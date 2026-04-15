@@ -15,9 +15,9 @@ from ..._response import (
     async_to_streamed_response_wrapper,
 )
 from ..._base_client import make_request_options
-from ...types.projects import key_create_params
-from ...types.projects.key_list_response import KeyListResponse
-from ...types.projects.key_create_response import KeyCreateResponse
+from ...types.account import key_create_params
+from ...types.account.key_list_response import KeyListResponse
+from ...types.account.key_create_response import KeyCreateResponse
 
 __all__ = ["KeysResource", "AsyncKeysResource"]
 
@@ -44,7 +44,6 @@ class KeysResource(SyncAPIResource):
 
     def create(
         self,
-        project_id: str,
         *,
         name: str,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -54,10 +53,10 @@ class KeysResource(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> KeyCreateResponse:
-        """Create a new API key for a project.
+        """Create a new account-level API key.
 
-        The raw key is returned ONCE in this
-        response and is never stored.
+        The raw key is returned ONCE and is never
+        stored — save it securely.
 
         Args:
           extra_headers: Send extra headers
@@ -68,10 +67,8 @@ class KeysResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        if not project_id:
-            raise ValueError(f"Expected a non-empty value for `project_id` but received {project_id!r}")
         return self._post(
-            path_template("/api/v1/projects/{project_id}/keys", project_id=project_id),
+            "/api/v1/account/keys",
             body=maybe_transform({"name": name}, key_create_params.KeyCreateParams),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -85,7 +82,6 @@ class KeysResource(SyncAPIResource):
 
     def list(
         self,
-        project_id: str,
         *,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -94,22 +90,9 @@ class KeysResource(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> KeyListResponse:
-        """
-        List Keys
-
-        Args:
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        if not project_id:
-            raise ValueError(f"Expected a non-empty value for `project_id` but received {project_id!r}")
+        """List Keys"""
         return self._get(
-            path_template("/api/v1/projects/{project_id}/keys", project_id=project_id),
+            "/api/v1/account/keys",
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -124,7 +107,6 @@ class KeysResource(SyncAPIResource):
         self,
         key_id: str,
         *,
-        project_id: str,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -144,13 +126,11 @@ class KeysResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        if not project_id:
-            raise ValueError(f"Expected a non-empty value for `project_id` but received {project_id!r}")
         if not key_id:
             raise ValueError(f"Expected a non-empty value for `key_id` but received {key_id!r}")
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         return self._delete(
-            path_template("/api/v1/projects/{project_id}/keys/{key_id}", project_id=project_id, key_id=key_id),
+            path_template("/api/v1/account/keys/{key_id}", key_id=key_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -184,7 +164,6 @@ class AsyncKeysResource(AsyncAPIResource):
 
     async def create(
         self,
-        project_id: str,
         *,
         name: str,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -194,10 +173,10 @@ class AsyncKeysResource(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> KeyCreateResponse:
-        """Create a new API key for a project.
+        """Create a new account-level API key.
 
-        The raw key is returned ONCE in this
-        response and is never stored.
+        The raw key is returned ONCE and is never
+        stored — save it securely.
 
         Args:
           extra_headers: Send extra headers
@@ -208,10 +187,8 @@ class AsyncKeysResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        if not project_id:
-            raise ValueError(f"Expected a non-empty value for `project_id` but received {project_id!r}")
         return await self._post(
-            path_template("/api/v1/projects/{project_id}/keys", project_id=project_id),
+            "/api/v1/account/keys",
             body=await async_maybe_transform({"name": name}, key_create_params.KeyCreateParams),
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -225,7 +202,6 @@ class AsyncKeysResource(AsyncAPIResource):
 
     async def list(
         self,
-        project_id: str,
         *,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -234,22 +210,9 @@ class AsyncKeysResource(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> KeyListResponse:
-        """
-        List Keys
-
-        Args:
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        if not project_id:
-            raise ValueError(f"Expected a non-empty value for `project_id` but received {project_id!r}")
+        """List Keys"""
         return await self._get(
-            path_template("/api/v1/projects/{project_id}/keys", project_id=project_id),
+            "/api/v1/account/keys",
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -264,7 +227,6 @@ class AsyncKeysResource(AsyncAPIResource):
         self,
         key_id: str,
         *,
-        project_id: str,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -284,13 +246,11 @@ class AsyncKeysResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        if not project_id:
-            raise ValueError(f"Expected a non-empty value for `project_id` but received {project_id!r}")
         if not key_id:
             raise ValueError(f"Expected a non-empty value for `key_id` but received {key_id!r}")
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         return await self._delete(
-            path_template("/api/v1/projects/{project_id}/keys/{key_id}", project_id=project_id, key_id=key_id),
+            path_template("/api/v1/account/keys/{key_id}", key_id=key_id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

@@ -57,7 +57,7 @@ class ProjectsResource(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/stainless-sdks/deepraven-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/alpha-digital-minds/deepraven-python#accessing-raw-response-data-eg-headers
         """
         return ProjectsResourceWithRawResponse(self)
 
@@ -66,7 +66,7 @@ class ProjectsResource(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/stainless-sdks/deepraven-python#with_streaming_response
+        For more information, see https://www.github.com/alpha-digital-minds/deepraven-python#with_streaming_response
         """
         return ProjectsResourceWithStreamingResponse(self)
 
@@ -257,6 +257,43 @@ class ProjectsResource(SyncAPIResource):
             cast_to=NoneType,
         )
 
+    def export_profiles(
+        self,
+        project_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> object:
+        """
+        Download all contact profiles for a project as a single JSON file.
+
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not project_id:
+            raise ValueError(f"Expected a non-empty value for `project_id` but received {project_id!r}")
+        return self._get(
+            path_template("/api/v1/projects/{project_id}/profiles/export", project_id=project_id),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                security={},
+            ),
+            cast_to=object,
+        )
+
 
 class AsyncProjectsResource(AsyncAPIResource):
     @cached_property
@@ -273,7 +310,7 @@ class AsyncProjectsResource(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/stainless-sdks/deepraven-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/alpha-digital-minds/deepraven-python#accessing-raw-response-data-eg-headers
         """
         return AsyncProjectsResourceWithRawResponse(self)
 
@@ -282,7 +319,7 @@ class AsyncProjectsResource(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/stainless-sdks/deepraven-python#with_streaming_response
+        For more information, see https://www.github.com/alpha-digital-minds/deepraven-python#with_streaming_response
         """
         return AsyncProjectsResourceWithStreamingResponse(self)
 
@@ -473,6 +510,43 @@ class AsyncProjectsResource(AsyncAPIResource):
             cast_to=NoneType,
         )
 
+    async def export_profiles(
+        self,
+        project_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> object:
+        """
+        Download all contact profiles for a project as a single JSON file.
+
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not project_id:
+            raise ValueError(f"Expected a non-empty value for `project_id` but received {project_id!r}")
+        return await self._get(
+            path_template("/api/v1/projects/{project_id}/profiles/export", project_id=project_id),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                security={},
+            ),
+            cast_to=object,
+        )
+
 
 class ProjectsResourceWithRawResponse:
     def __init__(self, projects: ProjectsResource) -> None:
@@ -492,6 +566,9 @@ class ProjectsResourceWithRawResponse:
         )
         self.delete = to_raw_response_wrapper(
             projects.delete,
+        )
+        self.export_profiles = to_raw_response_wrapper(
+            projects.export_profiles,
         )
 
     @cached_property
@@ -522,6 +599,9 @@ class AsyncProjectsResourceWithRawResponse:
         self.delete = async_to_raw_response_wrapper(
             projects.delete,
         )
+        self.export_profiles = async_to_raw_response_wrapper(
+            projects.export_profiles,
+        )
 
     @cached_property
     def keys(self) -> AsyncKeysResourceWithRawResponse:
@@ -551,6 +631,9 @@ class ProjectsResourceWithStreamingResponse:
         self.delete = to_streamed_response_wrapper(
             projects.delete,
         )
+        self.export_profiles = to_streamed_response_wrapper(
+            projects.export_profiles,
+        )
 
     @cached_property
     def keys(self) -> KeysResourceWithStreamingResponse:
@@ -579,6 +662,9 @@ class AsyncProjectsResourceWithStreamingResponse:
         )
         self.delete = async_to_streamed_response_wrapper(
             projects.delete,
+        )
+        self.export_profiles = async_to_streamed_response_wrapper(
+            projects.export_profiles,
         )
 
     @cached_property
