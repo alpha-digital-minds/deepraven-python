@@ -32,8 +32,10 @@ from ._base_client import (
 )
 
 if TYPE_CHECKING:
-    from .resources import auth, projects
+    from .resources import auth, stats, account, projects
     from .resources.auth import AuthResource, AsyncAuthResource
+    from .resources.stats import StatsResource, AsyncStatsResource
+    from .resources.account.account import AccountResource, AsyncAccountResource
     from .resources.projects.projects import ProjectsResource, AsyncProjectsResource
 
 __all__ = [
@@ -110,10 +112,22 @@ class DeepRaven(SyncAPIClient):
         return AuthResource(self)
 
     @cached_property
+    def account(self) -> AccountResource:
+        from .resources.account import AccountResource
+
+        return AccountResource(self)
+
+    @cached_property
     def projects(self) -> ProjectsResource:
         from .resources.projects import ProjectsResource
 
         return ProjectsResource(self)
+
+    @cached_property
+    def stats(self) -> StatsResource:
+        from .resources.stats import StatsResource
+
+        return StatsResource(self)
 
     @cached_property
     def with_raw_response(self) -> DeepRavenWithRawResponse:
@@ -295,10 +309,22 @@ class AsyncDeepRaven(AsyncAPIClient):
         return AsyncAuthResource(self)
 
     @cached_property
+    def account(self) -> AsyncAccountResource:
+        from .resources.account import AsyncAccountResource
+
+        return AsyncAccountResource(self)
+
+    @cached_property
     def projects(self) -> AsyncProjectsResource:
         from .resources.projects import AsyncProjectsResource
 
         return AsyncProjectsResource(self)
+
+    @cached_property
+    def stats(self) -> AsyncStatsResource:
+        from .resources.stats import AsyncStatsResource
+
+        return AsyncStatsResource(self)
 
     @cached_property
     def with_raw_response(self) -> AsyncDeepRavenWithRawResponse:
@@ -431,10 +457,22 @@ class DeepRavenWithRawResponse:
         return AuthResourceWithRawResponse(self._client.auth)
 
     @cached_property
+    def account(self) -> account.AccountResourceWithRawResponse:
+        from .resources.account import AccountResourceWithRawResponse
+
+        return AccountResourceWithRawResponse(self._client.account)
+
+    @cached_property
     def projects(self) -> projects.ProjectsResourceWithRawResponse:
         from .resources.projects import ProjectsResourceWithRawResponse
 
         return ProjectsResourceWithRawResponse(self._client.projects)
+
+    @cached_property
+    def stats(self) -> stats.StatsResourceWithRawResponse:
+        from .resources.stats import StatsResourceWithRawResponse
+
+        return StatsResourceWithRawResponse(self._client.stats)
 
 
 class AsyncDeepRavenWithRawResponse:
@@ -450,10 +488,22 @@ class AsyncDeepRavenWithRawResponse:
         return AsyncAuthResourceWithRawResponse(self._client.auth)
 
     @cached_property
+    def account(self) -> account.AsyncAccountResourceWithRawResponse:
+        from .resources.account import AsyncAccountResourceWithRawResponse
+
+        return AsyncAccountResourceWithRawResponse(self._client.account)
+
+    @cached_property
     def projects(self) -> projects.AsyncProjectsResourceWithRawResponse:
         from .resources.projects import AsyncProjectsResourceWithRawResponse
 
         return AsyncProjectsResourceWithRawResponse(self._client.projects)
+
+    @cached_property
+    def stats(self) -> stats.AsyncStatsResourceWithRawResponse:
+        from .resources.stats import AsyncStatsResourceWithRawResponse
+
+        return AsyncStatsResourceWithRawResponse(self._client.stats)
 
 
 class DeepRavenWithStreamedResponse:
@@ -469,10 +519,22 @@ class DeepRavenWithStreamedResponse:
         return AuthResourceWithStreamingResponse(self._client.auth)
 
     @cached_property
+    def account(self) -> account.AccountResourceWithStreamingResponse:
+        from .resources.account import AccountResourceWithStreamingResponse
+
+        return AccountResourceWithStreamingResponse(self._client.account)
+
+    @cached_property
     def projects(self) -> projects.ProjectsResourceWithStreamingResponse:
         from .resources.projects import ProjectsResourceWithStreamingResponse
 
         return ProjectsResourceWithStreamingResponse(self._client.projects)
+
+    @cached_property
+    def stats(self) -> stats.StatsResourceWithStreamingResponse:
+        from .resources.stats import StatsResourceWithStreamingResponse
+
+        return StatsResourceWithStreamingResponse(self._client.stats)
 
 
 class AsyncDeepRavenWithStreamedResponse:
@@ -488,10 +550,22 @@ class AsyncDeepRavenWithStreamedResponse:
         return AsyncAuthResourceWithStreamingResponse(self._client.auth)
 
     @cached_property
+    def account(self) -> account.AsyncAccountResourceWithStreamingResponse:
+        from .resources.account import AsyncAccountResourceWithStreamingResponse
+
+        return AsyncAccountResourceWithStreamingResponse(self._client.account)
+
+    @cached_property
     def projects(self) -> projects.AsyncProjectsResourceWithStreamingResponse:
         from .resources.projects import AsyncProjectsResourceWithStreamingResponse
 
         return AsyncProjectsResourceWithStreamingResponse(self._client.projects)
+
+    @cached_property
+    def stats(self) -> stats.AsyncStatsResourceWithStreamingResponse:
+        from .resources.stats import AsyncStatsResourceWithStreamingResponse
+
+        return AsyncStatsResourceWithStreamingResponse(self._client.stats)
 
 
 Client = DeepRaven

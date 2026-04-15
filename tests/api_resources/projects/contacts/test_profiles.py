@@ -12,6 +12,7 @@ from tests.utils import assert_matches_type
 from deepraven.types.projects.contacts import (
     ProfileStatusResponse,
     ProfileExtractResponse,
+    ProfileCompressResponse,
     ProfileRetrieveResponse,
     ProfileExtractSyncResponse,
 )
@@ -76,17 +77,17 @@ class TestProfiles:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_method_delete_contact(self, client: DeepRaven) -> None:
-        profile = client.projects.contacts.profiles.delete_contact(
+    def test_method_compress(self, client: DeepRaven) -> None:
+        profile = client.projects.contacts.profiles.compress(
             contact_id="contact_id",
             project_id="project_id",
         )
-        assert profile is None
+        assert_matches_type(ProfileCompressResponse, profile, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_raw_response_delete_contact(self, client: DeepRaven) -> None:
-        response = client.projects.contacts.profiles.with_raw_response.delete_contact(
+    def test_raw_response_compress(self, client: DeepRaven) -> None:
+        response = client.projects.contacts.profiles.with_raw_response.compress(
             contact_id="contact_id",
             project_id="project_id",
         )
@@ -94,12 +95,12 @@ class TestProfiles:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         profile = response.parse()
-        assert profile is None
+        assert_matches_type(ProfileCompressResponse, profile, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_streaming_response_delete_contact(self, client: DeepRaven) -> None:
-        with client.projects.contacts.profiles.with_streaming_response.delete_contact(
+    def test_streaming_response_compress(self, client: DeepRaven) -> None:
+        with client.projects.contacts.profiles.with_streaming_response.compress(
             contact_id="contact_id",
             project_id="project_id",
         ) as response:
@@ -107,21 +108,73 @@ class TestProfiles:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             profile = response.parse()
-            assert profile is None
+            assert_matches_type(ProfileCompressResponse, profile, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    def test_path_params_delete_contact(self, client: DeepRaven) -> None:
+    def test_path_params_compress(self, client: DeepRaven) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `project_id` but received ''"):
-            client.projects.contacts.profiles.with_raw_response.delete_contact(
+            client.projects.contacts.profiles.with_raw_response.compress(
                 contact_id="contact_id",
                 project_id="",
             )
 
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `contact_id` but received ''"):
-            client.projects.contacts.profiles.with_raw_response.delete_contact(
+            client.projects.contacts.profiles.with_raw_response.compress(
+                contact_id="",
+                project_id="project_id",
+            )
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_method_export(self, client: DeepRaven) -> None:
+        profile = client.projects.contacts.profiles.export(
+            contact_id="contact_id",
+            project_id="project_id",
+        )
+        assert_matches_type(object, profile, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_raw_response_export(self, client: DeepRaven) -> None:
+        response = client.projects.contacts.profiles.with_raw_response.export(
+            contact_id="contact_id",
+            project_id="project_id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        profile = response.parse()
+        assert_matches_type(object, profile, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_streaming_response_export(self, client: DeepRaven) -> None:
+        with client.projects.contacts.profiles.with_streaming_response.export(
+            contact_id="contact_id",
+            project_id="project_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            profile = response.parse()
+            assert_matches_type(object, profile, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_path_params_export(self, client: DeepRaven) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `project_id` but received ''"):
+            client.projects.contacts.profiles.with_raw_response.export(
+                contact_id="contact_id",
+                project_id="",
+            )
+
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `contact_id` but received ''"):
+            client.projects.contacts.profiles.with_raw_response.export(
                 contact_id="",
                 project_id="project_id",
             )
@@ -362,17 +415,17 @@ class TestAsyncProfiles:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_method_delete_contact(self, async_client: AsyncDeepRaven) -> None:
-        profile = await async_client.projects.contacts.profiles.delete_contact(
+    async def test_method_compress(self, async_client: AsyncDeepRaven) -> None:
+        profile = await async_client.projects.contacts.profiles.compress(
             contact_id="contact_id",
             project_id="project_id",
         )
-        assert profile is None
+        assert_matches_type(ProfileCompressResponse, profile, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_raw_response_delete_contact(self, async_client: AsyncDeepRaven) -> None:
-        response = await async_client.projects.contacts.profiles.with_raw_response.delete_contact(
+    async def test_raw_response_compress(self, async_client: AsyncDeepRaven) -> None:
+        response = await async_client.projects.contacts.profiles.with_raw_response.compress(
             contact_id="contact_id",
             project_id="project_id",
         )
@@ -380,12 +433,12 @@ class TestAsyncProfiles:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         profile = await response.parse()
-        assert profile is None
+        assert_matches_type(ProfileCompressResponse, profile, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_streaming_response_delete_contact(self, async_client: AsyncDeepRaven) -> None:
-        async with async_client.projects.contacts.profiles.with_streaming_response.delete_contact(
+    async def test_streaming_response_compress(self, async_client: AsyncDeepRaven) -> None:
+        async with async_client.projects.contacts.profiles.with_streaming_response.compress(
             contact_id="contact_id",
             project_id="project_id",
         ) as response:
@@ -393,21 +446,73 @@ class TestAsyncProfiles:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             profile = await response.parse()
-            assert profile is None
+            assert_matches_type(ProfileCompressResponse, profile, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
-    async def test_path_params_delete_contact(self, async_client: AsyncDeepRaven) -> None:
+    async def test_path_params_compress(self, async_client: AsyncDeepRaven) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `project_id` but received ''"):
-            await async_client.projects.contacts.profiles.with_raw_response.delete_contact(
+            await async_client.projects.contacts.profiles.with_raw_response.compress(
                 contact_id="contact_id",
                 project_id="",
             )
 
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `contact_id` but received ''"):
-            await async_client.projects.contacts.profiles.with_raw_response.delete_contact(
+            await async_client.projects.contacts.profiles.with_raw_response.compress(
+                contact_id="",
+                project_id="project_id",
+            )
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_method_export(self, async_client: AsyncDeepRaven) -> None:
+        profile = await async_client.projects.contacts.profiles.export(
+            contact_id="contact_id",
+            project_id="project_id",
+        )
+        assert_matches_type(object, profile, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_raw_response_export(self, async_client: AsyncDeepRaven) -> None:
+        response = await async_client.projects.contacts.profiles.with_raw_response.export(
+            contact_id="contact_id",
+            project_id="project_id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        profile = await response.parse()
+        assert_matches_type(object, profile, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_streaming_response_export(self, async_client: AsyncDeepRaven) -> None:
+        async with async_client.projects.contacts.profiles.with_streaming_response.export(
+            contact_id="contact_id",
+            project_id="project_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            profile = await response.parse()
+            assert_matches_type(object, profile, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_path_params_export(self, async_client: AsyncDeepRaven) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `project_id` but received ''"):
+            await async_client.projects.contacts.profiles.with_raw_response.export(
+                contact_id="contact_id",
+                project_id="",
+            )
+
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `contact_id` but received ''"):
+            await async_client.projects.contacts.profiles.with_raw_response.export(
                 contact_id="",
                 project_id="project_id",
             )

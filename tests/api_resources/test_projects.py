@@ -229,6 +229,48 @@ class TestProjects:
                 "",
             )
 
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_method_export_profiles(self, client: DeepRaven) -> None:
+        project = client.projects.export_profiles(
+            "project_id",
+        )
+        assert_matches_type(object, project, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_raw_response_export_profiles(self, client: DeepRaven) -> None:
+        response = client.projects.with_raw_response.export_profiles(
+            "project_id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        project = response.parse()
+        assert_matches_type(object, project, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_streaming_response_export_profiles(self, client: DeepRaven) -> None:
+        with client.projects.with_streaming_response.export_profiles(
+            "project_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            project = response.parse()
+            assert_matches_type(object, project, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_path_params_export_profiles(self, client: DeepRaven) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `project_id` but received ''"):
+            client.projects.with_raw_response.export_profiles(
+                "",
+            )
+
 
 class TestAsyncProjects:
     parametrize = pytest.mark.parametrize(
@@ -439,5 +481,47 @@ class TestAsyncProjects:
     async def test_path_params_delete(self, async_client: AsyncDeepRaven) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `project_id` but received ''"):
             await async_client.projects.with_raw_response.delete(
+                "",
+            )
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_method_export_profiles(self, async_client: AsyncDeepRaven) -> None:
+        project = await async_client.projects.export_profiles(
+            "project_id",
+        )
+        assert_matches_type(object, project, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_raw_response_export_profiles(self, async_client: AsyncDeepRaven) -> None:
+        response = await async_client.projects.with_raw_response.export_profiles(
+            "project_id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        project = await response.parse()
+        assert_matches_type(object, project, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_streaming_response_export_profiles(self, async_client: AsyncDeepRaven) -> None:
+        async with async_client.projects.with_streaming_response.export_profiles(
+            "project_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            project = await response.parse()
+            assert_matches_type(object, project, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_path_params_export_profiles(self, async_client: AsyncDeepRaven) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `project_id` but received ''"):
+            await async_client.projects.with_raw_response.export_profiles(
                 "",
             )
