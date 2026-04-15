@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1 (2026-04-15)
+
+Full Changelog: [v0.1.0...v0.1.1](https://github.com/alpha-digital-minds/deepraven-python/compare/v0.1.0...v0.1.1)
+
+### Chores
+
+* update SDK settings ([6c1b509](https://github.com/alpha-digital-minds/deepraven-python/commit/6c1b509ef11542665c6a5f69b2a8448e06dc2721))
+
 ## 0.1.0 (2026-04-15)
 
 Full Changelog: [v0.0.1...v0.1.0](https://github.com/alpha-digital-minds/deepraven-python/compare/v0.0.1...v0.1.0)
