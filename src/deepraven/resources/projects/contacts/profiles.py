@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import httpx
 
-from ...._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not_given
+from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ...._utils import path_template, maybe_transform, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
@@ -18,6 +18,7 @@ from ...._base_client import make_request_options
 from ....types.projects.contacts import profile_extract_params, profile_extract_sync_params
 from ....types.projects.contacts.profile_status_response import ProfileStatusResponse
 from ....types.projects.contacts.profile_extract_response import ProfileExtractResponse
+from ....types.projects.contacts.profile_compress_response import ProfileCompressResponse
 from ....types.projects.contacts.profile_retrieve_response import ProfileRetrieveResponse
 from ....types.projects.contacts.profile_extract_sync_response import ProfileExtractSyncResponse
 
@@ -31,7 +32,7 @@ class ProfilesResource(SyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/alpha-digital-minds/deepraven-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/stainless-sdks/deepraven-python#accessing-raw-response-data-eg-headers
         """
         return ProfilesResourceWithRawResponse(self)
 
@@ -40,7 +41,7 @@ class ProfilesResource(SyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/alpha-digital-minds/deepraven-python#with_streaming_response
+        For more information, see https://www.github.com/stainless-sdks/deepraven-python#with_streaming_response
         """
         return ProfilesResourceWithStreamingResponse(self)
 
@@ -89,7 +90,7 @@ class ProfilesResource(SyncAPIResource):
             cast_to=ProfileRetrieveResponse,
         )
 
-    def delete_contact(
+    def compress(
         self,
         contact_id: str,
         *,
@@ -100,9 +101,11 @@ class ProfilesResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
-        """
-        Delete all data (contact, profile, conversations) for a contact.
+    ) -> ProfileCompressResponse:
+        """Run compression on the current profile — trim bloat, newer wins.
+
+        Safe to call at
+        any time; intended to be triggered manually or by the daily scheduler.
 
         Args:
           extra_headers: Send extra headers
@@ -117,10 +120,9 @@ class ProfilesResource(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `project_id` but received {project_id!r}")
         if not contact_id:
             raise ValueError(f"Expected a non-empty value for `contact_id` but received {contact_id!r}")
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
-        return self._delete(
+        return self._post(
             path_template(
-                "/api/v1/projects/{project_id}/contacts/{contact_id}/contact",
+                "/api/v1/projects/{project_id}/contacts/{contact_id}/profile/compress",
                 project_id=project_id,
                 contact_id=contact_id,
             ),
@@ -131,7 +133,51 @@ class ProfilesResource(SyncAPIResource):
                 timeout=timeout,
                 security={},
             ),
-            cast_to=NoneType,
+            cast_to=ProfileCompressResponse,
+        )
+
+    def export(
+        self,
+        contact_id: str,
+        *,
+        project_id: str,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> object:
+        """
+        Download a single contact's profile as a JSON file.
+
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not project_id:
+            raise ValueError(f"Expected a non-empty value for `project_id` but received {project_id!r}")
+        if not contact_id:
+            raise ValueError(f"Expected a non-empty value for `contact_id` but received {contact_id!r}")
+        return self._get(
+            path_template(
+                "/api/v1/projects/{project_id}/contacts/{contact_id}/profile/export",
+                project_id=project_id,
+                contact_id=contact_id,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                security={},
+            ),
+            cast_to=object,
         )
 
     def extract(
@@ -284,7 +330,7 @@ class AsyncProfilesResource(AsyncAPIResource):
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
-        For more information, see https://www.github.com/alpha-digital-minds/deepraven-python#accessing-raw-response-data-eg-headers
+        For more information, see https://www.github.com/stainless-sdks/deepraven-python#accessing-raw-response-data-eg-headers
         """
         return AsyncProfilesResourceWithRawResponse(self)
 
@@ -293,7 +339,7 @@ class AsyncProfilesResource(AsyncAPIResource):
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
-        For more information, see https://www.github.com/alpha-digital-minds/deepraven-python#with_streaming_response
+        For more information, see https://www.github.com/stainless-sdks/deepraven-python#with_streaming_response
         """
         return AsyncProfilesResourceWithStreamingResponse(self)
 
@@ -342,7 +388,7 @@ class AsyncProfilesResource(AsyncAPIResource):
             cast_to=ProfileRetrieveResponse,
         )
 
-    async def delete_contact(
+    async def compress(
         self,
         contact_id: str,
         *,
@@ -353,9 +399,11 @@ class AsyncProfilesResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
-        """
-        Delete all data (contact, profile, conversations) for a contact.
+    ) -> ProfileCompressResponse:
+        """Run compression on the current profile — trim bloat, newer wins.
+
+        Safe to call at
+        any time; intended to be triggered manually or by the daily scheduler.
 
         Args:
           extra_headers: Send extra headers
@@ -370,10 +418,9 @@ class AsyncProfilesResource(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `project_id` but received {project_id!r}")
         if not contact_id:
             raise ValueError(f"Expected a non-empty value for `contact_id` but received {contact_id!r}")
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
-        return await self._delete(
+        return await self._post(
             path_template(
-                "/api/v1/projects/{project_id}/contacts/{contact_id}/contact",
+                "/api/v1/projects/{project_id}/contacts/{contact_id}/profile/compress",
                 project_id=project_id,
                 contact_id=contact_id,
             ),
@@ -384,7 +431,51 @@ class AsyncProfilesResource(AsyncAPIResource):
                 timeout=timeout,
                 security={},
             ),
-            cast_to=NoneType,
+            cast_to=ProfileCompressResponse,
+        )
+
+    async def export(
+        self,
+        contact_id: str,
+        *,
+        project_id: str,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> object:
+        """
+        Download a single contact's profile as a JSON file.
+
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not project_id:
+            raise ValueError(f"Expected a non-empty value for `project_id` but received {project_id!r}")
+        if not contact_id:
+            raise ValueError(f"Expected a non-empty value for `contact_id` but received {contact_id!r}")
+        return await self._get(
+            path_template(
+                "/api/v1/projects/{project_id}/contacts/{contact_id}/profile/export",
+                project_id=project_id,
+                contact_id=contact_id,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                security={},
+            ),
+            cast_to=object,
         )
 
     async def extract(
@@ -539,8 +630,11 @@ class ProfilesResourceWithRawResponse:
         self.retrieve = to_raw_response_wrapper(
             profiles.retrieve,
         )
-        self.delete_contact = to_raw_response_wrapper(
-            profiles.delete_contact,
+        self.compress = to_raw_response_wrapper(
+            profiles.compress,
+        )
+        self.export = to_raw_response_wrapper(
+            profiles.export,
         )
         self.extract = to_raw_response_wrapper(
             profiles.extract,
@@ -560,8 +654,11 @@ class AsyncProfilesResourceWithRawResponse:
         self.retrieve = async_to_raw_response_wrapper(
             profiles.retrieve,
         )
-        self.delete_contact = async_to_raw_response_wrapper(
-            profiles.delete_contact,
+        self.compress = async_to_raw_response_wrapper(
+            profiles.compress,
+        )
+        self.export = async_to_raw_response_wrapper(
+            profiles.export,
         )
         self.extract = async_to_raw_response_wrapper(
             profiles.extract,
@@ -581,8 +678,11 @@ class ProfilesResourceWithStreamingResponse:
         self.retrieve = to_streamed_response_wrapper(
             profiles.retrieve,
         )
-        self.delete_contact = to_streamed_response_wrapper(
-            profiles.delete_contact,
+        self.compress = to_streamed_response_wrapper(
+            profiles.compress,
+        )
+        self.export = to_streamed_response_wrapper(
+            profiles.export,
         )
         self.extract = to_streamed_response_wrapper(
             profiles.extract,
@@ -602,8 +702,11 @@ class AsyncProfilesResourceWithStreamingResponse:
         self.retrieve = async_to_streamed_response_wrapper(
             profiles.retrieve,
         )
-        self.delete_contact = async_to_streamed_response_wrapper(
-            profiles.delete_contact,
+        self.compress = async_to_streamed_response_wrapper(
+            profiles.compress,
+        )
+        self.export = async_to_streamed_response_wrapper(
+            profiles.export,
         )
         self.extract = async_to_streamed_response_wrapper(
             profiles.extract,
