@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.0 (2026-04-15)
+
+Full Changelog: [v0.1.2...v0.2.0](https://github.com/alpha-digital-minds/deepraven-python/compare/v0.1.2...v0.2.0)
+
+### Features
+
+* **api:** api update ([e93534f](https://github.com/alpha-digital-minds/deepraven-python/commit/e93534fcbe5429758191b061e640e0f7a6d2d6a1))
+
+
+### Chores
+
+* update SDK settings ([31cd81b](https://github.com/alpha-digital-minds/deepraven-python/commit/31cd81b357cb0cd294a3bc1e17ac8bf34e656620))
+* update SDK settings ([69d3e61](https://github.com/alpha-digital-minds/deepraven-python/commit/69d3e612ddc4eac8a284e2ea6ff7b66b577e9c29))
+
 ## 0.1.2 (2026-04-15)
 
 Full Changelog: [v0.1.1...v0.1.2](https://github.com/alpha-digital-minds/deepraven-python/compare/v0.1.1...v0.1.2)
