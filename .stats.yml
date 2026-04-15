@@ -1,4 +1,4 @@
-configured_endpoints: 19
-openapi_spec_url: https://storage.googleapis.com/stainless-sdk-openapi-specs/alpha-digital-minds-gmbh%2Fdeepraven-21652c2d2e6a5aab678ca435ba09ef698ff34270021f349660b84d5d98bf3923.yml
-openapi_spec_hash: 356a7298b2abac3fdf72ad5ee046b952
-config_hash: ca5a307d8d52ead697177877fd945b16
+configured_endpoints: 24
+openapi_spec_url: https://storage.googleapis.com/stainless-sdk-openapi-specs/alpha-digital-minds-gmbh%2Fdeepraven-3a0616f995bbbe7b512ce53a429c6cd6563fab0100b952ecc5266c6ee3b79b77.yml
+openapi_spec_hash: ab36c4f6a519a45b0a39f70154b4b9c7
+config_hash: db965d29b6a98d2c35860735eccd303c

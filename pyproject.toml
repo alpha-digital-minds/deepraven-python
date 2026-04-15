@@ -1,11 +1,11 @@
 [project]
 name = "deepraven"
 version = "0.0.1"
-description = "The official Python library for the deepraven API"
+description = "The official Python library for the DeepRaven API"
 dynamic = ["readme"]
 license = "Apache-2.0"
 authors = [
-{ name = "Deepraven", email = "" },
+{ name = "Deep Raven", email = "hello@adminds.at" },
 ]
 
 dependencies = [

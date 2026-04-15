@@ -24,7 +24,7 @@ from ._compat import cached_property
 from ._models import SecurityOptions
 from ._version import __version__
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
-from ._exceptions import APIStatusError, DeepravenError
+from ._exceptions import APIStatusError, DeepRavenError
 from ._base_client import (
     DEFAULT_MAX_RETRIES,
     SyncAPIClient,
@@ -32,24 +32,23 @@ from ._base_client import (
 )
 
 if TYPE_CHECKING:
-    from .resources import pets, store, users
-    from .resources.pets import PetsResource, AsyncPetsResource
-    from .resources.users import UsersResource, AsyncUsersResource
-    from .resources.store.store import StoreResource, AsyncStoreResource
+    from .resources import auth, projects
+    from .resources.auth import AuthResource, AsyncAuthResource
+    from .resources.projects.projects import ProjectsResource, AsyncProjectsResource
 
 __all__ = [
     "Timeout",
     "Transport",
     "ProxiesTypes",
     "RequestOptions",
-    "Deepraven",
-    "AsyncDeepraven",
+    "DeepRaven",
+    "AsyncDeepRaven",
     "Client",
     "AsyncClient",
 ]
 
 
-class Deepraven(SyncAPIClient):
+class DeepRaven(SyncAPIClient):
     # client options
     api_key: str
 
@@ -76,22 +75,22 @@ class Deepraven(SyncAPIClient):
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        """Construct a new synchronous Deepraven client instance.
+        """Construct a new synchronous DeepRaven client instance.
 
-        This automatically infers the `api_key` argument from the `PETSTORE_API_KEY` environment variable if it is not provided.
+        This automatically infers the `api_key` argument from the `DEEPRAVEN_API_KEY` environment variable if it is not provided.
         """
         if api_key is None:
-            api_key = os.environ.get("PETSTORE_API_KEY")
+            api_key = os.environ.get("DEEPRAVEN_API_KEY")
         if api_key is None:
-            raise DeepravenError(
-                "The api_key client option must be set either by passing api_key to the client or by setting the PETSTORE_API_KEY environment variable"
+            raise DeepRavenError(
+                "The api_key client option must be set either by passing api_key to the client or by setting the DEEPRAVEN_API_KEY environment variable"
             )
         self.api_key = api_key
 
         if base_url is None:
-            base_url = os.environ.get("DEEPRAVEN_BASE_URL")
+            base_url = os.environ.get("DEEP_RAVEN_BASE_URL")
         if base_url is None:
-            base_url = f"https://petstore3.swagger.io/api/v3"
+            base_url = f"https://deepraven.ai"
 
         super().__init__(
             version=__version__,
@@ -105,33 +104,24 @@ class Deepraven(SyncAPIClient):
         )
 
     @cached_property
-    def pets(self) -> PetsResource:
-        """Everything about your Pets"""
-        from .resources.pets import PetsResource
+    def auth(self) -> AuthResource:
+        from .resources.auth import AuthResource
 
-        return PetsResource(self)
-
-    @cached_property
-    def store(self) -> StoreResource:
-        """Access to Petstore orders"""
-        from .resources.store import StoreResource
-
-        return StoreResource(self)
+        return AuthResource(self)
 
     @cached_property
-    def users(self) -> UsersResource:
-        """Operations about user"""
-        from .resources.users import UsersResource
+    def projects(self) -> ProjectsResource:
+        from .resources.projects import ProjectsResource
 
-        return UsersResource(self)
-
-    @cached_property
-    def with_raw_response(self) -> DeepravenWithRawResponse:
-        return DeepravenWithRawResponse(self)
+        return ProjectsResource(self)
 
     @cached_property
-    def with_streaming_response(self) -> DeepravenWithStreamedResponse:
-        return DeepravenWithStreamedResponse(self)
+    def with_raw_response(self) -> DeepRavenWithRawResponse:
+        return DeepRavenWithRawResponse(self)
+
+    @cached_property
+    def with_streaming_response(self) -> DeepRavenWithStreamedResponse:
+        return DeepRavenWithStreamedResponse(self)
 
     @property
     @override
@@ -141,13 +131,13 @@ class Deepraven(SyncAPIClient):
     @override
     def _auth_headers(self, security: SecurityOptions) -> dict[str, str]:
         return {
-            **(self._api_key if security.get("api_key", False) else {}),
+            **(self._bearer_auth if security.get("bearer_auth", False) else {}),
         }
 
     @property
-    def _api_key(self) -> dict[str, str]:
+    def _bearer_auth(self) -> dict[str, str]:
         api_key = self.api_key
-        return {"api_key": api_key}
+        return {"Authorization": f"Bearer {api_key}"}
 
     @property
     @override
@@ -243,7 +233,7 @@ class Deepraven(SyncAPIClient):
         return APIStatusError(err_msg, response=response, body=body)
 
 
-class AsyncDeepraven(AsyncAPIClient):
+class AsyncDeepRaven(AsyncAPIClient):
     # client options
     api_key: str
 
@@ -270,22 +260,22 @@ class AsyncDeepraven(AsyncAPIClient):
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        """Construct a new async AsyncDeepraven client instance.
+        """Construct a new async AsyncDeepRaven client instance.
 
-        This automatically infers the `api_key` argument from the `PETSTORE_API_KEY` environment variable if it is not provided.
+        This automatically infers the `api_key` argument from the `DEEPRAVEN_API_KEY` environment variable if it is not provided.
         """
         if api_key is None:
-            api_key = os.environ.get("PETSTORE_API_KEY")
+            api_key = os.environ.get("DEEPRAVEN_API_KEY")
         if api_key is None:
-            raise DeepravenError(
-                "The api_key client option must be set either by passing api_key to the client or by setting the PETSTORE_API_KEY environment variable"
+            raise DeepRavenError(
+                "The api_key client option must be set either by passing api_key to the client or by setting the DEEPRAVEN_API_KEY environment variable"
             )
         self.api_key = api_key
 
         if base_url is None:
-            base_url = os.environ.get("DEEPRAVEN_BASE_URL")
+            base_url = os.environ.get("DEEP_RAVEN_BASE_URL")
         if base_url is None:
-            base_url = f"https://petstore3.swagger.io/api/v3"
+            base_url = f"https://deepraven.ai"
 
         super().__init__(
             version=__version__,
@@ -299,33 +289,24 @@ class AsyncDeepraven(AsyncAPIClient):
         )
 
     @cached_property
-    def pets(self) -> AsyncPetsResource:
-        """Everything about your Pets"""
-        from .resources.pets import AsyncPetsResource
+    def auth(self) -> AsyncAuthResource:
+        from .resources.auth import AsyncAuthResource
 
-        return AsyncPetsResource(self)
-
-    @cached_property
-    def store(self) -> AsyncStoreResource:
-        """Access to Petstore orders"""
-        from .resources.store import AsyncStoreResource
-
-        return AsyncStoreResource(self)
+        return AsyncAuthResource(self)
 
     @cached_property
-    def users(self) -> AsyncUsersResource:
-        """Operations about user"""
-        from .resources.users import AsyncUsersResource
+    def projects(self) -> AsyncProjectsResource:
+        from .resources.projects import AsyncProjectsResource
 
-        return AsyncUsersResource(self)
-
-    @cached_property
-    def with_raw_response(self) -> AsyncDeepravenWithRawResponse:
-        return AsyncDeepravenWithRawResponse(self)
+        return AsyncProjectsResource(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncDeepravenWithStreamedResponse:
-        return AsyncDeepravenWithStreamedResponse(self)
+    def with_raw_response(self) -> AsyncDeepRavenWithRawResponse:
+        return AsyncDeepRavenWithRawResponse(self)
+
+    @cached_property
+    def with_streaming_response(self) -> AsyncDeepRavenWithStreamedResponse:
+        return AsyncDeepRavenWithStreamedResponse(self)
 
     @property
     @override
@@ -335,13 +316,13 @@ class AsyncDeepraven(AsyncAPIClient):
     @override
     def _auth_headers(self, security: SecurityOptions) -> dict[str, str]:
         return {
-            **(self._api_key if security.get("api_key", False) else {}),
+            **(self._bearer_auth if security.get("bearer_auth", False) else {}),
         }
 
     @property
-    def _api_key(self) -> dict[str, str]:
+    def _bearer_auth(self) -> dict[str, str]:
         api_key = self.api_key
-        return {"api_key": api_key}
+        return {"Authorization": f"Bearer {api_key}"}
 
     @property
     @override
@@ -437,118 +418,82 @@ class AsyncDeepraven(AsyncAPIClient):
         return APIStatusError(err_msg, response=response, body=body)
 
 
-class DeepravenWithRawResponse:
-    _client: Deepraven
+class DeepRavenWithRawResponse:
+    _client: DeepRaven
 
-    def __init__(self, client: Deepraven) -> None:
+    def __init__(self, client: DeepRaven) -> None:
         self._client = client
 
     @cached_property
-    def pets(self) -> pets.PetsResourceWithRawResponse:
-        """Everything about your Pets"""
-        from .resources.pets import PetsResourceWithRawResponse
+    def auth(self) -> auth.AuthResourceWithRawResponse:
+        from .resources.auth import AuthResourceWithRawResponse
 
-        return PetsResourceWithRawResponse(self._client.pets)
-
-    @cached_property
-    def store(self) -> store.StoreResourceWithRawResponse:
-        """Access to Petstore orders"""
-        from .resources.store import StoreResourceWithRawResponse
-
-        return StoreResourceWithRawResponse(self._client.store)
+        return AuthResourceWithRawResponse(self._client.auth)
 
     @cached_property
-    def users(self) -> users.UsersResourceWithRawResponse:
-        """Operations about user"""
-        from .resources.users import UsersResourceWithRawResponse
+    def projects(self) -> projects.ProjectsResourceWithRawResponse:
+        from .resources.projects import ProjectsResourceWithRawResponse
 
-        return UsersResourceWithRawResponse(self._client.users)
+        return ProjectsResourceWithRawResponse(self._client.projects)
 
 
-class AsyncDeepravenWithRawResponse:
-    _client: AsyncDeepraven
+class AsyncDeepRavenWithRawResponse:
+    _client: AsyncDeepRaven
 
-    def __init__(self, client: AsyncDeepraven) -> None:
+    def __init__(self, client: AsyncDeepRaven) -> None:
         self._client = client
 
     @cached_property
-    def pets(self) -> pets.AsyncPetsResourceWithRawResponse:
-        """Everything about your Pets"""
-        from .resources.pets import AsyncPetsResourceWithRawResponse
+    def auth(self) -> auth.AsyncAuthResourceWithRawResponse:
+        from .resources.auth import AsyncAuthResourceWithRawResponse
 
-        return AsyncPetsResourceWithRawResponse(self._client.pets)
-
-    @cached_property
-    def store(self) -> store.AsyncStoreResourceWithRawResponse:
-        """Access to Petstore orders"""
-        from .resources.store import AsyncStoreResourceWithRawResponse
-
-        return AsyncStoreResourceWithRawResponse(self._client.store)
+        return AsyncAuthResourceWithRawResponse(self._client.auth)
 
     @cached_property
-    def users(self) -> users.AsyncUsersResourceWithRawResponse:
-        """Operations about user"""
-        from .resources.users import AsyncUsersResourceWithRawResponse
+    def projects(self) -> projects.AsyncProjectsResourceWithRawResponse:
+        from .resources.projects import AsyncProjectsResourceWithRawResponse
 
-        return AsyncUsersResourceWithRawResponse(self._client.users)
+        return AsyncProjectsResourceWithRawResponse(self._client.projects)
 
 
-class DeepravenWithStreamedResponse:
-    _client: Deepraven
+class DeepRavenWithStreamedResponse:
+    _client: DeepRaven
 
-    def __init__(self, client: Deepraven) -> None:
+    def __init__(self, client: DeepRaven) -> None:
         self._client = client
 
     @cached_property
-    def pets(self) -> pets.PetsResourceWithStreamingResponse:
-        """Everything about your Pets"""
-        from .resources.pets import PetsResourceWithStreamingResponse
+    def auth(self) -> auth.AuthResourceWithStreamingResponse:
+        from .resources.auth import AuthResourceWithStreamingResponse
 
-        return PetsResourceWithStreamingResponse(self._client.pets)
-
-    @cached_property
-    def store(self) -> store.StoreResourceWithStreamingResponse:
-        """Access to Petstore orders"""
-        from .resources.store import StoreResourceWithStreamingResponse
-
-        return StoreResourceWithStreamingResponse(self._client.store)
+        return AuthResourceWithStreamingResponse(self._client.auth)
 
     @cached_property
-    def users(self) -> users.UsersResourceWithStreamingResponse:
-        """Operations about user"""
-        from .resources.users import UsersResourceWithStreamingResponse
+    def projects(self) -> projects.ProjectsResourceWithStreamingResponse:
+        from .resources.projects import ProjectsResourceWithStreamingResponse
 
-        return UsersResourceWithStreamingResponse(self._client.users)
+        return ProjectsResourceWithStreamingResponse(self._client.projects)
 
 
-class AsyncDeepravenWithStreamedResponse:
-    _client: AsyncDeepraven
+class AsyncDeepRavenWithStreamedResponse:
+    _client: AsyncDeepRaven
 
-    def __init__(self, client: AsyncDeepraven) -> None:
+    def __init__(self, client: AsyncDeepRaven) -> None:
         self._client = client
 
     @cached_property
-    def pets(self) -> pets.AsyncPetsResourceWithStreamingResponse:
-        """Everything about your Pets"""
-        from .resources.pets import AsyncPetsResourceWithStreamingResponse
+    def auth(self) -> auth.AsyncAuthResourceWithStreamingResponse:
+        from .resources.auth import AsyncAuthResourceWithStreamingResponse
 
-        return AsyncPetsResourceWithStreamingResponse(self._client.pets)
-
-    @cached_property
-    def store(self) -> store.AsyncStoreResourceWithStreamingResponse:
-        """Access to Petstore orders"""
-        from .resources.store import AsyncStoreResourceWithStreamingResponse
-
-        return AsyncStoreResourceWithStreamingResponse(self._client.store)
+        return AsyncAuthResourceWithStreamingResponse(self._client.auth)
 
     @cached_property
-    def users(self) -> users.AsyncUsersResourceWithStreamingResponse:
-        """Operations about user"""
-        from .resources.users import AsyncUsersResourceWithStreamingResponse
+    def projects(self) -> projects.AsyncProjectsResourceWithStreamingResponse:
+        from .resources.projects import AsyncProjectsResourceWithStreamingResponse
 
-        return AsyncUsersResourceWithStreamingResponse(self._client.users)
+        return AsyncProjectsResourceWithStreamingResponse(self._client.projects)
 
 
-Client = Deepraven
+Client = DeepRaven
 
-AsyncClient = AsyncDeepraven
+AsyncClient = AsyncDeepRaven

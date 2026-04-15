@@ -18,11 +18,11 @@ __all__ = [
 ]
 
 
-class DeepravenError(Exception):
+class DeepRavenError(Exception):
     pass
 
 
-class APIError(DeepravenError):
+class APIError(DeepRavenError):
     message: str
     request: httpx.Request
 
