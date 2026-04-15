@@ -19,11 +19,11 @@ import pytest
 from respx import MockRouter
 from pydantic import ValidationError
 
-from deepraven import Deepraven, AsyncDeepraven, APIResponseValidationError
+from deepraven import DeepRaven, AsyncDeepRaven, APIResponseValidationError
 from deepraven._types import Omit
 from deepraven._utils import asyncify
 from deepraven._models import BaseModel, FinalRequestOptions
-from deepraven._exceptions import APIStatusError, DeepravenError, APITimeoutError, APIResponseValidationError
+from deepraven._exceptions import APIStatusError, APITimeoutError, APIResponseValidationError
 from deepraven._base_client import (
     DEFAULT_TIMEOUT,
     HTTPX_DEFAULT_TIMEOUT,
@@ -103,7 +103,7 @@ async def _make_async_iterator(iterable: Iterable[T], counter: Optional[Counter]
         yield item
 
 
-def _get_open_connections(client: Deepraven | AsyncDeepraven) -> int:
+def _get_open_connections(client: DeepRaven | AsyncDeepRaven) -> int:
     transport = client._client._transport
     assert isinstance(transport, httpx.HTTPTransport) or isinstance(transport, httpx.AsyncHTTPTransport)
 
@@ -111,9 +111,9 @@ def _get_open_connections(client: Deepraven | AsyncDeepraven) -> int:
     return len(pool._requests)
 
 
-class TestDeepraven:
+class TestDeepRaven:
     @pytest.mark.respx(base_url=base_url)
-    def test_raw_response(self, respx_mock: MockRouter, client: Deepraven) -> None:
+    def test_raw_response(self, respx_mock: MockRouter, client: DeepRaven) -> None:
         respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
         response = client.post("/foo", cast_to=httpx.Response)
@@ -122,7 +122,7 @@ class TestDeepraven:
         assert response.json() == {"foo": "bar"}
 
     @pytest.mark.respx(base_url=base_url)
-    def test_raw_response_for_binary(self, respx_mock: MockRouter, client: Deepraven) -> None:
+    def test_raw_response_for_binary(self, respx_mock: MockRouter, client: DeepRaven) -> None:
         respx_mock.post("/foo").mock(
             return_value=httpx.Response(200, headers={"Content-Type": "application/binary"}, content='{"foo": "bar"}')
         )
@@ -132,7 +132,7 @@ class TestDeepraven:
         assert isinstance(response, httpx.Response)
         assert response.json() == {"foo": "bar"}
 
-    def test_copy(self, client: Deepraven) -> None:
+    def test_copy(self, client: DeepRaven) -> None:
         copied = client.copy()
         assert id(copied) != id(client)
 
@@ -140,7 +140,7 @@ class TestDeepraven:
         assert copied.api_key == "another My API Key"
         assert client.api_key == "My API Key"
 
-    def test_copy_default_options(self, client: Deepraven) -> None:
+    def test_copy_default_options(self, client: DeepRaven) -> None:
         # options that have a default are overridden correctly
         copied = client.copy(max_retries=7)
         assert copied.max_retries == 7
@@ -157,7 +157,7 @@ class TestDeepraven:
         assert isinstance(client.timeout, httpx.Timeout)
 
     def test_copy_default_headers(self) -> None:
-        client = Deepraven(
+        client = DeepRaven(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         assert client.default_headers["X-Foo"] == "bar"
@@ -192,7 +192,7 @@ class TestDeepraven:
         client.close()
 
     def test_copy_default_query(self) -> None:
-        client = Deepraven(
+        client = DeepRaven(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"foo": "bar"}
         )
         assert _get_params(client)["foo"] == "bar"
@@ -229,7 +229,7 @@ class TestDeepraven:
 
         client.close()
 
-    def test_copy_signature(self, client: Deepraven) -> None:
+    def test_copy_signature(self, client: DeepRaven) -> None:
         # ensure the same parameters that can be passed to the client are defined in the `.copy()` method
         init_signature = inspect.signature(
             # mypy doesn't like that we access the `__init__` property.
@@ -246,7 +246,7 @@ class TestDeepraven:
             assert copy_param is not None, f"copy() signature is missing the {name} param"
 
     @pytest.mark.skipif(sys.version_info >= (3, 10), reason="fails because of a memory leak that started from 3.12")
-    def test_copy_build_request(self, client: Deepraven) -> None:
+    def test_copy_build_request(self, client: DeepRaven) -> None:
         options = FinalRequestOptions(method="get", url="/foo")
 
         def build_request(options: FinalRequestOptions) -> None:
@@ -308,7 +308,7 @@ class TestDeepraven:
                     print(frame)
             raise AssertionError()
 
-    def test_request_timeout(self, client: Deepraven) -> None:
+    def test_request_timeout(self, client: DeepRaven) -> None:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
         assert timeout == DEFAULT_TIMEOUT
@@ -318,7 +318,7 @@ class TestDeepraven:
         assert timeout == httpx.Timeout(100.0)
 
     def test_client_timeout_option(self) -> None:
-        client = Deepraven(
+        client = DeepRaven(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=httpx.Timeout(0)
         )
 
@@ -331,7 +331,7 @@ class TestDeepraven:
     def test_http_client_timeout_option(self) -> None:
         # custom timeout given to the httpx client should be used
         with httpx.Client(timeout=None) as http_client:
-            client = Deepraven(
+            client = DeepRaven(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
@@ -343,7 +343,7 @@ class TestDeepraven:
 
         # no timeout given to the httpx client should not use the httpx default
         with httpx.Client() as http_client:
-            client = Deepraven(
+            client = DeepRaven(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
@@ -355,7 +355,7 @@ class TestDeepraven:
 
         # explicitly passing the default timeout currently results in it being ignored
         with httpx.Client(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
-            client = Deepraven(
+            client = DeepRaven(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
@@ -368,7 +368,7 @@ class TestDeepraven:
     async def test_invalid_http_client(self) -> None:
         with pytest.raises(TypeError, match="Invalid `http_client` arg"):
             async with httpx.AsyncClient() as http_client:
-                Deepraven(
+                DeepRaven(
                     base_url=base_url,
                     api_key=api_key,
                     _strict_response_validation=True,
@@ -376,14 +376,14 @@ class TestDeepraven:
                 )
 
     def test_default_headers_option(self) -> None:
-        test_client = Deepraven(
+        test_client = DeepRaven(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         request = test_client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("x-foo") == "bar"
         assert request.headers.get("x-stainless-lang") == "python"
 
-        test_client2 = Deepraven(
+        test_client2 = DeepRaven(
             base_url=base_url,
             api_key=api_key,
             _strict_response_validation=True,
@@ -399,18 +399,8 @@ class TestDeepraven:
         test_client.close()
         test_client2.close()
 
-    def test_validate_headers(self) -> None:
-        client = Deepraven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
-        request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        assert request.headers.get("api_key") == api_key
-
-        with pytest.raises(DeepravenError):
-            with update_env(**{"PETSTORE_API_KEY": Omit()}):
-                client2 = Deepraven(base_url=base_url, api_key=None, _strict_response_validation=True)
-            _ = client2
-
     def test_default_query_option(self) -> None:
-        client = Deepraven(
+        client = DeepRaven(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"query_param": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -429,7 +419,7 @@ class TestDeepraven:
 
         client.close()
 
-    def test_hardcoded_query_params_in_url(self, client: Deepraven) -> None:
+    def test_hardcoded_query_params_in_url(self, client: DeepRaven) -> None:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo?beta=true"))
         url = httpx.URL(request.url)
         assert dict(url.params) == {"beta": "true"}
@@ -453,7 +443,7 @@ class TestDeepraven:
         )
         assert request.url.raw_path == b"/files/a%2Fb?beta=true&limit=10"
 
-    def test_request_extra_json(self, client: Deepraven) -> None:
+    def test_request_extra_json(self, client: DeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -487,7 +477,7 @@ class TestDeepraven:
         data = json.loads(request.content.decode("utf-8"))
         assert data == {"foo": "bar", "baz": None}
 
-    def test_request_extra_headers(self, client: Deepraven) -> None:
+    def test_request_extra_headers(self, client: DeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -509,7 +499,7 @@ class TestDeepraven:
         )
         assert request.headers.get("X-Bar") == "false"
 
-    def test_request_extra_query(self, client: Deepraven) -> None:
+    def test_request_extra_query(self, client: DeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -550,7 +540,7 @@ class TestDeepraven:
         params = dict(request.url.params)
         assert params == {"foo": "2"}
 
-    def test_multipart_repeating_array(self, client: Deepraven) -> None:
+    def test_multipart_repeating_array(self, client: DeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions.construct(
                 method="post",
@@ -580,7 +570,7 @@ class TestDeepraven:
         ]
 
     @pytest.mark.respx(base_url=base_url)
-    def test_binary_content_upload(self, respx_mock: MockRouter, client: Deepraven) -> None:
+    def test_binary_content_upload(self, respx_mock: MockRouter, client: DeepRaven) -> None:
         respx_mock.post("/upload").mock(side_effect=mirror_request_content)
 
         file_content = b"Hello, this is a test file."
@@ -605,7 +595,7 @@ class TestDeepraven:
             assert counter.value == 0, "the request body should not have been read"
             return httpx.Response(200, content=request.read())
 
-        with Deepraven(
+        with DeepRaven(
             base_url=base_url,
             api_key=api_key,
             _strict_response_validation=True,
@@ -624,7 +614,7 @@ class TestDeepraven:
             assert counter.value == 1
 
     @pytest.mark.respx(base_url=base_url)
-    def test_binary_content_upload_with_body_is_deprecated(self, respx_mock: MockRouter, client: Deepraven) -> None:
+    def test_binary_content_upload_with_body_is_deprecated(self, respx_mock: MockRouter, client: DeepRaven) -> None:
         respx_mock.post("/upload").mock(side_effect=mirror_request_content)
 
         file_content = b"Hello, this is a test file."
@@ -644,7 +634,7 @@ class TestDeepraven:
         assert response.content == file_content
 
     @pytest.mark.respx(base_url=base_url)
-    def test_basic_union_response(self, respx_mock: MockRouter, client: Deepraven) -> None:
+    def test_basic_union_response(self, respx_mock: MockRouter, client: DeepRaven) -> None:
         class Model1(BaseModel):
             name: str
 
@@ -658,7 +648,7 @@ class TestDeepraven:
         assert response.foo == "bar"
 
     @pytest.mark.respx(base_url=base_url)
-    def test_union_response_different_types(self, respx_mock: MockRouter, client: Deepraven) -> None:
+    def test_union_response_different_types(self, respx_mock: MockRouter, client: DeepRaven) -> None:
         """Union of objects with the same field name using a different type"""
 
         class Model1(BaseModel):
@@ -680,7 +670,7 @@ class TestDeepraven:
         assert response.foo == 1
 
     @pytest.mark.respx(base_url=base_url)
-    def test_non_application_json_content_type_for_json_data(self, respx_mock: MockRouter, client: Deepraven) -> None:
+    def test_non_application_json_content_type_for_json_data(self, respx_mock: MockRouter, client: DeepRaven) -> None:
         """
         Response that sets Content-Type to something other than application/json but returns json data
         """
@@ -701,7 +691,7 @@ class TestDeepraven:
         assert response.foo == 2
 
     def test_base_url_setter(self) -> None:
-        client = Deepraven(base_url="https://example.com/from_init", api_key=api_key, _strict_response_validation=True)
+        client = DeepRaven(base_url="https://example.com/from_init", api_key=api_key, _strict_response_validation=True)
         assert client.base_url == "https://example.com/from_init/"
 
         client.base_url = "https://example.com/from_setter"  # type: ignore[assignment]
@@ -711,15 +701,15 @@ class TestDeepraven:
         client.close()
 
     def test_base_url_env(self) -> None:
-        with update_env(DEEPRAVEN_BASE_URL="http://localhost:5000/from/env"):
-            client = Deepraven(api_key=api_key, _strict_response_validation=True)
+        with update_env(DEEP_RAVEN_BASE_URL="http://localhost:5000/from/env"):
+            client = DeepRaven(api_key=api_key, _strict_response_validation=True)
             assert client.base_url == "http://localhost:5000/from/env/"
 
     @pytest.mark.parametrize(
         "client",
         [
-            Deepraven(base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True),
-            Deepraven(
+            DeepRaven(base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True),
+            DeepRaven(
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
@@ -728,7 +718,7 @@ class TestDeepraven:
         ],
         ids=["standard", "custom http client"],
     )
-    def test_base_url_trailing_slash(self, client: Deepraven) -> None:
+    def test_base_url_trailing_slash(self, client: DeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -742,8 +732,8 @@ class TestDeepraven:
     @pytest.mark.parametrize(
         "client",
         [
-            Deepraven(base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True),
-            Deepraven(
+            DeepRaven(base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True),
+            DeepRaven(
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
@@ -752,7 +742,7 @@ class TestDeepraven:
         ],
         ids=["standard", "custom http client"],
     )
-    def test_base_url_no_trailing_slash(self, client: Deepraven) -> None:
+    def test_base_url_no_trailing_slash(self, client: DeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -766,8 +756,8 @@ class TestDeepraven:
     @pytest.mark.parametrize(
         "client",
         [
-            Deepraven(base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True),
-            Deepraven(
+            DeepRaven(base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True),
+            DeepRaven(
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
@@ -776,7 +766,7 @@ class TestDeepraven:
         ],
         ids=["standard", "custom http client"],
     )
-    def test_absolute_request_url(self, client: Deepraven) -> None:
+    def test_absolute_request_url(self, client: DeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -788,7 +778,7 @@ class TestDeepraven:
         client.close()
 
     def test_copied_client_does_not_close_http(self) -> None:
-        test_client = Deepraven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        test_client = DeepRaven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         assert not test_client.is_closed()
 
         copied = test_client.copy()
@@ -799,7 +789,7 @@ class TestDeepraven:
         assert not test_client.is_closed()
 
     def test_client_context_manager(self) -> None:
-        test_client = Deepraven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        test_client = DeepRaven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         with test_client as c2:
             assert c2 is test_client
             assert not c2.is_closed()
@@ -807,7 +797,7 @@ class TestDeepraven:
         assert test_client.is_closed()
 
     @pytest.mark.respx(base_url=base_url)
-    def test_client_response_validation_error(self, respx_mock: MockRouter, client: Deepraven) -> None:
+    def test_client_response_validation_error(self, respx_mock: MockRouter, client: DeepRaven) -> None:
         class Model(BaseModel):
             foo: str
 
@@ -820,7 +810,7 @@ class TestDeepraven:
 
     def test_client_max_retries_validation(self) -> None:
         with pytest.raises(TypeError, match=r"max_retries cannot be None"):
-            Deepraven(base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=cast(Any, None))
+            DeepRaven(base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=cast(Any, None))
 
     @pytest.mark.respx(base_url=base_url)
     def test_received_text_for_expected_json(self, respx_mock: MockRouter) -> None:
@@ -829,12 +819,12 @@ class TestDeepraven:
 
         respx_mock.get("/foo").mock(return_value=httpx.Response(200, text="my-custom-format"))
 
-        strict_client = Deepraven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        strict_client = DeepRaven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
 
         with pytest.raises(APIResponseValidationError):
             strict_client.get("/foo", cast_to=Model)
 
-        non_strict_client = Deepraven(base_url=base_url, api_key=api_key, _strict_response_validation=False)
+        non_strict_client = DeepRaven(base_url=base_url, api_key=api_key, _strict_response_validation=False)
 
         response = non_strict_client.get("/foo", cast_to=Model)
         assert isinstance(response, str)  # type: ignore[unreachable]
@@ -865,7 +855,7 @@ class TestDeepraven:
     )
     @mock.patch("time.time", mock.MagicMock(return_value=1696004797))
     def test_parse_retry_after_header(
-        self, remaining_retries: int, retry_after: str, timeout: float, client: Deepraven
+        self, remaining_retries: int, retry_after: str, timeout: float, client: DeepRaven
     ) -> None:
         headers = httpx.Headers({"retry-after": retry_after})
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
@@ -874,21 +864,27 @@ class TestDeepraven:
 
     @mock.patch("deepraven._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter, client: Deepraven) -> None:
-        respx_mock.get("/store/inventory").mock(side_effect=httpx.TimeoutException("Test timeout error"))
+    def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter, client: DeepRaven) -> None:
+        respx_mock.get("/api/v1/projects/project_id/contacts/contact_id/profile").mock(
+            side_effect=httpx.TimeoutException("Test timeout error")
+        )
 
         with pytest.raises(APITimeoutError):
-            client.store.with_streaming_response.list_inventory().__enter__()
+            client.projects.contacts.profiles.with_streaming_response.retrieve(
+                contact_id="contact_id", project_id="project_id"
+            ).__enter__()
 
         assert _get_open_connections(client) == 0
 
     @mock.patch("deepraven._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter, client: Deepraven) -> None:
-        respx_mock.get("/store/inventory").mock(return_value=httpx.Response(500))
+    def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter, client: DeepRaven) -> None:
+        respx_mock.get("/api/v1/projects/project_id/contacts/contact_id/profile").mock(return_value=httpx.Response(500))
 
         with pytest.raises(APIStatusError):
-            client.store.with_streaming_response.list_inventory().__enter__()
+            client.projects.contacts.profiles.with_streaming_response.retrieve(
+                contact_id="contact_id", project_id="project_id"
+            ).__enter__()
         assert _get_open_connections(client) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
@@ -897,7 +893,7 @@ class TestDeepraven:
     @pytest.mark.parametrize("failure_mode", ["status", "exception"])
     def test_retries_taken(
         self,
-        client: Deepraven,
+        client: DeepRaven,
         failures_before_success: int,
         failure_mode: Literal["status", "exception"],
         respx_mock: MockRouter,
@@ -915,9 +911,11 @@ class TestDeepraven:
                 return httpx.Response(500)
             return httpx.Response(200)
 
-        respx_mock.get("/store/inventory").mock(side_effect=retry_handler)
+        respx_mock.get("/api/v1/projects/project_id/contacts/contact_id/profile").mock(side_effect=retry_handler)
 
-        response = client.store.with_raw_response.list_inventory()
+        response = client.projects.contacts.profiles.with_raw_response.retrieve(
+            contact_id="contact_id", project_id="project_id"
+        )
 
         assert response.retries_taken == failures_before_success
         assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
@@ -926,7 +924,7 @@ class TestDeepraven:
     @mock.patch("deepraven._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_omit_retry_count_header(
-        self, client: Deepraven, failures_before_success: int, respx_mock: MockRouter
+        self, client: DeepRaven, failures_before_success: int, respx_mock: MockRouter
     ) -> None:
         client = client.with_options(max_retries=4)
 
@@ -939,9 +937,11 @@ class TestDeepraven:
                 return httpx.Response(500)
             return httpx.Response(200)
 
-        respx_mock.get("/store/inventory").mock(side_effect=retry_handler)
+        respx_mock.get("/api/v1/projects/project_id/contacts/contact_id/profile").mock(side_effect=retry_handler)
 
-        response = client.store.with_raw_response.list_inventory(extra_headers={"x-stainless-retry-count": Omit()})
+        response = client.projects.contacts.profiles.with_raw_response.retrieve(
+            contact_id="contact_id", project_id="project_id", extra_headers={"x-stainless-retry-count": Omit()}
+        )
 
         assert len(response.http_request.headers.get_list("x-stainless-retry-count")) == 0
 
@@ -949,7 +949,7 @@ class TestDeepraven:
     @mock.patch("deepraven._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_overwrite_retry_count_header(
-        self, client: Deepraven, failures_before_success: int, respx_mock: MockRouter
+        self, client: DeepRaven, failures_before_success: int, respx_mock: MockRouter
     ) -> None:
         client = client.with_options(max_retries=4)
 
@@ -962,9 +962,11 @@ class TestDeepraven:
                 return httpx.Response(500)
             return httpx.Response(200)
 
-        respx_mock.get("/store/inventory").mock(side_effect=retry_handler)
+        respx_mock.get("/api/v1/projects/project_id/contacts/contact_id/profile").mock(side_effect=retry_handler)
 
-        response = client.store.with_raw_response.list_inventory(extra_headers={"x-stainless-retry-count": "42"})
+        response = client.projects.contacts.profiles.with_raw_response.retrieve(
+            contact_id="contact_id", project_id="project_id", extra_headers={"x-stainless-retry-count": "42"}
+        )
 
         assert response.http_request.headers.get("x-stainless-retry-count") == "42"
 
@@ -999,7 +1001,7 @@ class TestDeepraven:
         )
 
     @pytest.mark.respx(base_url=base_url)
-    def test_follow_redirects(self, respx_mock: MockRouter, client: Deepraven) -> None:
+    def test_follow_redirects(self, respx_mock: MockRouter, client: DeepRaven) -> None:
         # Test that the default follow_redirects=True allows following redirects
         respx_mock.post("/redirect").mock(
             return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
@@ -1011,7 +1013,7 @@ class TestDeepraven:
         assert response.json() == {"status": "ok"}
 
     @pytest.mark.respx(base_url=base_url)
-    def test_follow_redirects_disabled(self, respx_mock: MockRouter, client: Deepraven) -> None:
+    def test_follow_redirects_disabled(self, respx_mock: MockRouter, client: DeepRaven) -> None:
         # Test that follow_redirects=False prevents following redirects
         respx_mock.post("/redirect").mock(
             return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
@@ -1024,9 +1026,9 @@ class TestDeepraven:
         assert exc_info.value.response.headers["Location"] == f"{base_url}/redirected"
 
 
-class TestAsyncDeepraven:
+class TestAsyncDeepRaven:
     @pytest.mark.respx(base_url=base_url)
-    async def test_raw_response(self, respx_mock: MockRouter, async_client: AsyncDeepraven) -> None:
+    async def test_raw_response(self, respx_mock: MockRouter, async_client: AsyncDeepRaven) -> None:
         respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
         response = await async_client.post("/foo", cast_to=httpx.Response)
@@ -1035,7 +1037,7 @@ class TestAsyncDeepraven:
         assert response.json() == {"foo": "bar"}
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_raw_response_for_binary(self, respx_mock: MockRouter, async_client: AsyncDeepraven) -> None:
+    async def test_raw_response_for_binary(self, respx_mock: MockRouter, async_client: AsyncDeepRaven) -> None:
         respx_mock.post("/foo").mock(
             return_value=httpx.Response(200, headers={"Content-Type": "application/binary"}, content='{"foo": "bar"}')
         )
@@ -1045,7 +1047,7 @@ class TestAsyncDeepraven:
         assert isinstance(response, httpx.Response)
         assert response.json() == {"foo": "bar"}
 
-    def test_copy(self, async_client: AsyncDeepraven) -> None:
+    def test_copy(self, async_client: AsyncDeepRaven) -> None:
         copied = async_client.copy()
         assert id(copied) != id(async_client)
 
@@ -1053,7 +1055,7 @@ class TestAsyncDeepraven:
         assert copied.api_key == "another My API Key"
         assert async_client.api_key == "My API Key"
 
-    def test_copy_default_options(self, async_client: AsyncDeepraven) -> None:
+    def test_copy_default_options(self, async_client: AsyncDeepRaven) -> None:
         # options that have a default are overridden correctly
         copied = async_client.copy(max_retries=7)
         assert copied.max_retries == 7
@@ -1070,7 +1072,7 @@ class TestAsyncDeepraven:
         assert isinstance(async_client.timeout, httpx.Timeout)
 
     async def test_copy_default_headers(self) -> None:
-        client = AsyncDeepraven(
+        client = AsyncDeepRaven(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         assert client.default_headers["X-Foo"] == "bar"
@@ -1105,7 +1107,7 @@ class TestAsyncDeepraven:
         await client.close()
 
     async def test_copy_default_query(self) -> None:
-        client = AsyncDeepraven(
+        client = AsyncDeepRaven(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"foo": "bar"}
         )
         assert _get_params(client)["foo"] == "bar"
@@ -1142,7 +1144,7 @@ class TestAsyncDeepraven:
 
         await client.close()
 
-    def test_copy_signature(self, async_client: AsyncDeepraven) -> None:
+    def test_copy_signature(self, async_client: AsyncDeepRaven) -> None:
         # ensure the same parameters that can be passed to the client are defined in the `.copy()` method
         init_signature = inspect.signature(
             # mypy doesn't like that we access the `__init__` property.
@@ -1159,7 +1161,7 @@ class TestAsyncDeepraven:
             assert copy_param is not None, f"copy() signature is missing the {name} param"
 
     @pytest.mark.skipif(sys.version_info >= (3, 10), reason="fails because of a memory leak that started from 3.12")
-    def test_copy_build_request(self, async_client: AsyncDeepraven) -> None:
+    def test_copy_build_request(self, async_client: AsyncDeepRaven) -> None:
         options = FinalRequestOptions(method="get", url="/foo")
 
         def build_request(options: FinalRequestOptions) -> None:
@@ -1221,7 +1223,7 @@ class TestAsyncDeepraven:
                     print(frame)
             raise AssertionError()
 
-    async def test_request_timeout(self, async_client: AsyncDeepraven) -> None:
+    async def test_request_timeout(self, async_client: AsyncDeepRaven) -> None:
         request = async_client._build_request(FinalRequestOptions(method="get", url="/foo"))
         timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
         assert timeout == DEFAULT_TIMEOUT
@@ -1233,7 +1235,7 @@ class TestAsyncDeepraven:
         assert timeout == httpx.Timeout(100.0)
 
     async def test_client_timeout_option(self) -> None:
-        client = AsyncDeepraven(
+        client = AsyncDeepRaven(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, timeout=httpx.Timeout(0)
         )
 
@@ -1246,7 +1248,7 @@ class TestAsyncDeepraven:
     async def test_http_client_timeout_option(self) -> None:
         # custom timeout given to the httpx client should be used
         async with httpx.AsyncClient(timeout=None) as http_client:
-            client = AsyncDeepraven(
+            client = AsyncDeepRaven(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
@@ -1258,7 +1260,7 @@ class TestAsyncDeepraven:
 
         # no timeout given to the httpx client should not use the httpx default
         async with httpx.AsyncClient() as http_client:
-            client = AsyncDeepraven(
+            client = AsyncDeepRaven(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
@@ -1270,7 +1272,7 @@ class TestAsyncDeepraven:
 
         # explicitly passing the default timeout currently results in it being ignored
         async with httpx.AsyncClient(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
-            client = AsyncDeepraven(
+            client = AsyncDeepRaven(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, http_client=http_client
             )
 
@@ -1283,7 +1285,7 @@ class TestAsyncDeepraven:
     def test_invalid_http_client(self) -> None:
         with pytest.raises(TypeError, match="Invalid `http_client` arg"):
             with httpx.Client() as http_client:
-                AsyncDeepraven(
+                AsyncDeepRaven(
                     base_url=base_url,
                     api_key=api_key,
                     _strict_response_validation=True,
@@ -1291,14 +1293,14 @@ class TestAsyncDeepraven:
                 )
 
     async def test_default_headers_option(self) -> None:
-        test_client = AsyncDeepraven(
+        test_client = AsyncDeepRaven(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         request = test_client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("x-foo") == "bar"
         assert request.headers.get("x-stainless-lang") == "python"
 
-        test_client2 = AsyncDeepraven(
+        test_client2 = AsyncDeepRaven(
             base_url=base_url,
             api_key=api_key,
             _strict_response_validation=True,
@@ -1314,18 +1316,8 @@ class TestAsyncDeepraven:
         await test_client.close()
         await test_client2.close()
 
-    def test_validate_headers(self) -> None:
-        client = AsyncDeepraven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
-        request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        assert request.headers.get("api_key") == api_key
-
-        with pytest.raises(DeepravenError):
-            with update_env(**{"PETSTORE_API_KEY": Omit()}):
-                client2 = AsyncDeepraven(base_url=base_url, api_key=None, _strict_response_validation=True)
-            _ = client2
-
     async def test_default_query_option(self) -> None:
-        client = AsyncDeepraven(
+        client = AsyncDeepRaven(
             base_url=base_url, api_key=api_key, _strict_response_validation=True, default_query={"query_param": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -1344,7 +1336,7 @@ class TestAsyncDeepraven:
 
         await client.close()
 
-    async def test_hardcoded_query_params_in_url(self, async_client: AsyncDeepraven) -> None:
+    async def test_hardcoded_query_params_in_url(self, async_client: AsyncDeepRaven) -> None:
         request = async_client._build_request(FinalRequestOptions(method="get", url="/foo?beta=true"))
         url = httpx.URL(request.url)
         assert dict(url.params) == {"beta": "true"}
@@ -1368,7 +1360,7 @@ class TestAsyncDeepraven:
         )
         assert request.url.raw_path == b"/files/a%2Fb?beta=true&limit=10"
 
-    def test_request_extra_json(self, client: Deepraven) -> None:
+    def test_request_extra_json(self, client: DeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1402,7 +1394,7 @@ class TestAsyncDeepraven:
         data = json.loads(request.content.decode("utf-8"))
         assert data == {"foo": "bar", "baz": None}
 
-    def test_request_extra_headers(self, client: Deepraven) -> None:
+    def test_request_extra_headers(self, client: DeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1424,7 +1416,7 @@ class TestAsyncDeepraven:
         )
         assert request.headers.get("X-Bar") == "false"
 
-    def test_request_extra_query(self, client: Deepraven) -> None:
+    def test_request_extra_query(self, client: DeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1465,7 +1457,7 @@ class TestAsyncDeepraven:
         params = dict(request.url.params)
         assert params == {"foo": "2"}
 
-    def test_multipart_repeating_array(self, async_client: AsyncDeepraven) -> None:
+    def test_multipart_repeating_array(self, async_client: AsyncDeepRaven) -> None:
         request = async_client._build_request(
             FinalRequestOptions.construct(
                 method="post",
@@ -1495,7 +1487,7 @@ class TestAsyncDeepraven:
         ]
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_binary_content_upload(self, respx_mock: MockRouter, async_client: AsyncDeepraven) -> None:
+    async def test_binary_content_upload(self, respx_mock: MockRouter, async_client: AsyncDeepRaven) -> None:
         respx_mock.post("/upload").mock(side_effect=mirror_request_content)
 
         file_content = b"Hello, this is a test file."
@@ -1520,7 +1512,7 @@ class TestAsyncDeepraven:
             assert counter.value == 0, "the request body should not have been read"
             return httpx.Response(200, content=await request.aread())
 
-        async with AsyncDeepraven(
+        async with AsyncDeepRaven(
             base_url=base_url,
             api_key=api_key,
             _strict_response_validation=True,
@@ -1540,7 +1532,7 @@ class TestAsyncDeepraven:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_binary_content_upload_with_body_is_deprecated(
-        self, respx_mock: MockRouter, async_client: AsyncDeepraven
+        self, respx_mock: MockRouter, async_client: AsyncDeepRaven
     ) -> None:
         respx_mock.post("/upload").mock(side_effect=mirror_request_content)
 
@@ -1561,7 +1553,7 @@ class TestAsyncDeepraven:
         assert response.content == file_content
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_basic_union_response(self, respx_mock: MockRouter, async_client: AsyncDeepraven) -> None:
+    async def test_basic_union_response(self, respx_mock: MockRouter, async_client: AsyncDeepRaven) -> None:
         class Model1(BaseModel):
             name: str
 
@@ -1575,7 +1567,7 @@ class TestAsyncDeepraven:
         assert response.foo == "bar"
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_union_response_different_types(self, respx_mock: MockRouter, async_client: AsyncDeepraven) -> None:
+    async def test_union_response_different_types(self, respx_mock: MockRouter, async_client: AsyncDeepRaven) -> None:
         """Union of objects with the same field name using a different type"""
 
         class Model1(BaseModel):
@@ -1598,7 +1590,7 @@ class TestAsyncDeepraven:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_non_application_json_content_type_for_json_data(
-        self, respx_mock: MockRouter, async_client: AsyncDeepraven
+        self, respx_mock: MockRouter, async_client: AsyncDeepRaven
     ) -> None:
         """
         Response that sets Content-Type to something other than application/json but returns json data
@@ -1620,7 +1612,7 @@ class TestAsyncDeepraven:
         assert response.foo == 2
 
     async def test_base_url_setter(self) -> None:
-        client = AsyncDeepraven(
+        client = AsyncDeepRaven(
             base_url="https://example.com/from_init", api_key=api_key, _strict_response_validation=True
         )
         assert client.base_url == "https://example.com/from_init/"
@@ -1632,17 +1624,17 @@ class TestAsyncDeepraven:
         await client.close()
 
     async def test_base_url_env(self) -> None:
-        with update_env(DEEPRAVEN_BASE_URL="http://localhost:5000/from/env"):
-            client = AsyncDeepraven(api_key=api_key, _strict_response_validation=True)
+        with update_env(DEEP_RAVEN_BASE_URL="http://localhost:5000/from/env"):
+            client = AsyncDeepRaven(api_key=api_key, _strict_response_validation=True)
             assert client.base_url == "http://localhost:5000/from/env/"
 
     @pytest.mark.parametrize(
         "client",
         [
-            AsyncDeepraven(
+            AsyncDeepRaven(
                 base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True
             ),
-            AsyncDeepraven(
+            AsyncDeepRaven(
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
@@ -1651,7 +1643,7 @@ class TestAsyncDeepraven:
         ],
         ids=["standard", "custom http client"],
     )
-    async def test_base_url_trailing_slash(self, client: AsyncDeepraven) -> None:
+    async def test_base_url_trailing_slash(self, client: AsyncDeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1665,10 +1657,10 @@ class TestAsyncDeepraven:
     @pytest.mark.parametrize(
         "client",
         [
-            AsyncDeepraven(
+            AsyncDeepRaven(
                 base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True
             ),
-            AsyncDeepraven(
+            AsyncDeepRaven(
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
@@ -1677,7 +1669,7 @@ class TestAsyncDeepraven:
         ],
         ids=["standard", "custom http client"],
     )
-    async def test_base_url_no_trailing_slash(self, client: AsyncDeepraven) -> None:
+    async def test_base_url_no_trailing_slash(self, client: AsyncDeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1691,10 +1683,10 @@ class TestAsyncDeepraven:
     @pytest.mark.parametrize(
         "client",
         [
-            AsyncDeepraven(
+            AsyncDeepRaven(
                 base_url="http://localhost:5000/custom/path/", api_key=api_key, _strict_response_validation=True
             ),
-            AsyncDeepraven(
+            AsyncDeepRaven(
                 base_url="http://localhost:5000/custom/path/",
                 api_key=api_key,
                 _strict_response_validation=True,
@@ -1703,7 +1695,7 @@ class TestAsyncDeepraven:
         ],
         ids=["standard", "custom http client"],
     )
-    async def test_absolute_request_url(self, client: AsyncDeepraven) -> None:
+    async def test_absolute_request_url(self, client: AsyncDeepRaven) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1715,7 +1707,7 @@ class TestAsyncDeepraven:
         await client.close()
 
     async def test_copied_client_does_not_close_http(self) -> None:
-        test_client = AsyncDeepraven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        test_client = AsyncDeepRaven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         assert not test_client.is_closed()
 
         copied = test_client.copy()
@@ -1727,7 +1719,7 @@ class TestAsyncDeepraven:
         assert not test_client.is_closed()
 
     async def test_client_context_manager(self) -> None:
-        test_client = AsyncDeepraven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        test_client = AsyncDeepRaven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
         async with test_client as c2:
             assert c2 is test_client
             assert not c2.is_closed()
@@ -1735,7 +1727,7 @@ class TestAsyncDeepraven:
         assert test_client.is_closed()
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_client_response_validation_error(self, respx_mock: MockRouter, async_client: AsyncDeepraven) -> None:
+    async def test_client_response_validation_error(self, respx_mock: MockRouter, async_client: AsyncDeepRaven) -> None:
         class Model(BaseModel):
             foo: str
 
@@ -1748,7 +1740,7 @@ class TestAsyncDeepraven:
 
     async def test_client_max_retries_validation(self) -> None:
         with pytest.raises(TypeError, match=r"max_retries cannot be None"):
-            AsyncDeepraven(
+            AsyncDeepRaven(
                 base_url=base_url, api_key=api_key, _strict_response_validation=True, max_retries=cast(Any, None)
             )
 
@@ -1759,12 +1751,12 @@ class TestAsyncDeepraven:
 
         respx_mock.get("/foo").mock(return_value=httpx.Response(200, text="my-custom-format"))
 
-        strict_client = AsyncDeepraven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
+        strict_client = AsyncDeepRaven(base_url=base_url, api_key=api_key, _strict_response_validation=True)
 
         with pytest.raises(APIResponseValidationError):
             await strict_client.get("/foo", cast_to=Model)
 
-        non_strict_client = AsyncDeepraven(base_url=base_url, api_key=api_key, _strict_response_validation=False)
+        non_strict_client = AsyncDeepRaven(base_url=base_url, api_key=api_key, _strict_response_validation=False)
 
         response = await non_strict_client.get("/foo", cast_to=Model)
         assert isinstance(response, str)  # type: ignore[unreachable]
@@ -1795,7 +1787,7 @@ class TestAsyncDeepraven:
     )
     @mock.patch("time.time", mock.MagicMock(return_value=1696004797))
     async def test_parse_retry_after_header(
-        self, remaining_retries: int, retry_after: str, timeout: float, async_client: AsyncDeepraven
+        self, remaining_retries: int, retry_after: str, timeout: float, async_client: AsyncDeepRaven
     ) -> None:
         headers = httpx.Headers({"retry-after": retry_after})
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
@@ -1805,24 +1797,30 @@ class TestAsyncDeepraven:
     @mock.patch("deepraven._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_retrying_timeout_errors_doesnt_leak(
-        self, respx_mock: MockRouter, async_client: AsyncDeepraven
+        self, respx_mock: MockRouter, async_client: AsyncDeepRaven
     ) -> None:
-        respx_mock.get("/store/inventory").mock(side_effect=httpx.TimeoutException("Test timeout error"))
+        respx_mock.get("/api/v1/projects/project_id/contacts/contact_id/profile").mock(
+            side_effect=httpx.TimeoutException("Test timeout error")
+        )
 
         with pytest.raises(APITimeoutError):
-            await async_client.store.with_streaming_response.list_inventory().__aenter__()
+            await async_client.projects.contacts.profiles.with_streaming_response.retrieve(
+                contact_id="contact_id", project_id="project_id"
+            ).__aenter__()
 
         assert _get_open_connections(async_client) == 0
 
     @mock.patch("deepraven._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_retrying_status_errors_doesnt_leak(
-        self, respx_mock: MockRouter, async_client: AsyncDeepraven
+        self, respx_mock: MockRouter, async_client: AsyncDeepRaven
     ) -> None:
-        respx_mock.get("/store/inventory").mock(return_value=httpx.Response(500))
+        respx_mock.get("/api/v1/projects/project_id/contacts/contact_id/profile").mock(return_value=httpx.Response(500))
 
         with pytest.raises(APIStatusError):
-            await async_client.store.with_streaming_response.list_inventory().__aenter__()
+            await async_client.projects.contacts.profiles.with_streaming_response.retrieve(
+                contact_id="contact_id", project_id="project_id"
+            ).__aenter__()
         assert _get_open_connections(async_client) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
@@ -1831,7 +1829,7 @@ class TestAsyncDeepraven:
     @pytest.mark.parametrize("failure_mode", ["status", "exception"])
     async def test_retries_taken(
         self,
-        async_client: AsyncDeepraven,
+        async_client: AsyncDeepRaven,
         failures_before_success: int,
         failure_mode: Literal["status", "exception"],
         respx_mock: MockRouter,
@@ -1849,9 +1847,11 @@ class TestAsyncDeepraven:
                 return httpx.Response(500)
             return httpx.Response(200)
 
-        respx_mock.get("/store/inventory").mock(side_effect=retry_handler)
+        respx_mock.get("/api/v1/projects/project_id/contacts/contact_id/profile").mock(side_effect=retry_handler)
 
-        response = await client.store.with_raw_response.list_inventory()
+        response = await client.projects.contacts.profiles.with_raw_response.retrieve(
+            contact_id="contact_id", project_id="project_id"
+        )
 
         assert response.retries_taken == failures_before_success
         assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
@@ -1860,7 +1860,7 @@ class TestAsyncDeepraven:
     @mock.patch("deepraven._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_omit_retry_count_header(
-        self, async_client: AsyncDeepraven, failures_before_success: int, respx_mock: MockRouter
+        self, async_client: AsyncDeepRaven, failures_before_success: int, respx_mock: MockRouter
     ) -> None:
         client = async_client.with_options(max_retries=4)
 
@@ -1873,10 +1873,10 @@ class TestAsyncDeepraven:
                 return httpx.Response(500)
             return httpx.Response(200)
 
-        respx_mock.get("/store/inventory").mock(side_effect=retry_handler)
+        respx_mock.get("/api/v1/projects/project_id/contacts/contact_id/profile").mock(side_effect=retry_handler)
 
-        response = await client.store.with_raw_response.list_inventory(
-            extra_headers={"x-stainless-retry-count": Omit()}
+        response = await client.projects.contacts.profiles.with_raw_response.retrieve(
+            contact_id="contact_id", project_id="project_id", extra_headers={"x-stainless-retry-count": Omit()}
         )
 
         assert len(response.http_request.headers.get_list("x-stainless-retry-count")) == 0
@@ -1885,7 +1885,7 @@ class TestAsyncDeepraven:
     @mock.patch("deepraven._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_overwrite_retry_count_header(
-        self, async_client: AsyncDeepraven, failures_before_success: int, respx_mock: MockRouter
+        self, async_client: AsyncDeepRaven, failures_before_success: int, respx_mock: MockRouter
     ) -> None:
         client = async_client.with_options(max_retries=4)
 
@@ -1898,9 +1898,11 @@ class TestAsyncDeepraven:
                 return httpx.Response(500)
             return httpx.Response(200)
 
-        respx_mock.get("/store/inventory").mock(side_effect=retry_handler)
+        respx_mock.get("/api/v1/projects/project_id/contacts/contact_id/profile").mock(side_effect=retry_handler)
 
-        response = await client.store.with_raw_response.list_inventory(extra_headers={"x-stainless-retry-count": "42"})
+        response = await client.projects.contacts.profiles.with_raw_response.retrieve(
+            contact_id="contact_id", project_id="project_id", extra_headers={"x-stainless-retry-count": "42"}
+        )
 
         assert response.http_request.headers.get("x-stainless-retry-count") == "42"
 
@@ -1939,7 +1941,7 @@ class TestAsyncDeepraven:
         )
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_follow_redirects(self, respx_mock: MockRouter, async_client: AsyncDeepraven) -> None:
+    async def test_follow_redirects(self, respx_mock: MockRouter, async_client: AsyncDeepRaven) -> None:
         # Test that the default follow_redirects=True allows following redirects
         respx_mock.post("/redirect").mock(
             return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
@@ -1951,7 +1953,7 @@ class TestAsyncDeepraven:
         assert response.json() == {"status": "ok"}
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_follow_redirects_disabled(self, respx_mock: MockRouter, async_client: AsyncDeepraven) -> None:
+    async def test_follow_redirects_disabled(self, respx_mock: MockRouter, async_client: AsyncDeepRaven) -> None:
         # Test that follow_redirects=False prevents following redirects
         respx_mock.post("/redirect").mock(
             return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})

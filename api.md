@@ -1,69 +1,105 @@
-# Shared Types
-
-```python
-from deepraven.types import Order
-```
-
-# Pets
+# Auth
 
 Types:
 
 ```python
 from deepraven.types import (
-    Category,
-    Pet,
-    Tag,
-    PetFindByStatusResponse,
-    PetFindByTagsResponse,
-    PetUploadImageResponse,
+    AuthLoginResponse,
+    AuthRefreshResponse,
+    AuthRegisterResponse,
+    AuthUpdatePasswordResponse,
+    AuthVerifyOtpResponse,
 )
 ```
 
 Methods:
 
-- <code title="post /pet">client.pets.<a href="./src/deepraven/resources/pets.py">create</a>(\*\*<a href="src/deepraven/types/pet_create_params.py">params</a>) -> <a href="./src/deepraven/types/pet.py">Pet</a></code>
-- <code title="get /pet/{petId}">client.pets.<a href="./src/deepraven/resources/pets.py">retrieve</a>(pet_id) -> <a href="./src/deepraven/types/pet.py">Pet</a></code>
-- <code title="put /pet">client.pets.<a href="./src/deepraven/resources/pets.py">update</a>(\*\*<a href="src/deepraven/types/pet_update_params.py">params</a>) -> <a href="./src/deepraven/types/pet.py">Pet</a></code>
-- <code title="delete /pet/{petId}">client.pets.<a href="./src/deepraven/resources/pets.py">delete</a>(pet_id) -> None</code>
-- <code title="get /pet/findByStatus">client.pets.<a href="./src/deepraven/resources/pets.py">find_by_status</a>(\*\*<a href="src/deepraven/types/pet_find_by_status_params.py">params</a>) -> <a href="./src/deepraven/types/pet_find_by_status_response.py">PetFindByStatusResponse</a></code>
-- <code title="get /pet/findByTags">client.pets.<a href="./src/deepraven/resources/pets.py">find_by_tags</a>(\*\*<a href="src/deepraven/types/pet_find_by_tags_params.py">params</a>) -> <a href="./src/deepraven/types/pet_find_by_tags_response.py">PetFindByTagsResponse</a></code>
-- <code title="post /pet/{petId}">client.pets.<a href="./src/deepraven/resources/pets.py">update_by_id</a>(pet_id, \*\*<a href="src/deepraven/types/pet_update_by_id_params.py">params</a>) -> None</code>
-- <code title="post /pet/{petId}/uploadImage">client.pets.<a href="./src/deepraven/resources/pets.py">upload_image</a>(pet_id, image, \*\*<a href="src/deepraven/types/pet_upload_image_params.py">params</a>) -> <a href="./src/deepraven/types/pet_upload_image_response.py">PetUploadImageResponse</a></code>
+- <code title="post /api/v1/auth/login">client.auth.<a href="./src/deepraven/resources/auth.py">login</a>(\*\*<a href="src/deepraven/types/auth_login_params.py">params</a>) -> <a href="./src/deepraven/types/auth_login_response.py">AuthLoginResponse</a></code>
+- <code title="post /api/v1/auth/refresh">client.auth.<a href="./src/deepraven/resources/auth.py">refresh</a>(\*\*<a href="src/deepraven/types/auth_refresh_params.py">params</a>) -> <a href="./src/deepraven/types/auth_refresh_response.py">AuthRefreshResponse</a></code>
+- <code title="post /api/v1/auth/register">client.auth.<a href="./src/deepraven/resources/auth.py">register</a>(\*\*<a href="src/deepraven/types/auth_register_params.py">params</a>) -> <a href="./src/deepraven/types/auth_register_response.py">AuthRegisterResponse</a></code>
+- <code title="post /api/v1/auth/resend-otp">client.auth.<a href="./src/deepraven/resources/auth.py">resend_otp</a>(\*\*<a href="src/deepraven/types/auth_resend_otp_params.py">params</a>) -> None</code>
+- <code title="post /api/v1/auth/reset-password">client.auth.<a href="./src/deepraven/resources/auth.py">reset_password</a>(\*\*<a href="src/deepraven/types/auth_reset_password_params.py">params</a>) -> None</code>
+- <code title="post /api/v1/auth/update-password">client.auth.<a href="./src/deepraven/resources/auth.py">update_password</a>(\*\*<a href="src/deepraven/types/auth_update_password_params.py">params</a>) -> <a href="./src/deepraven/types/auth_update_password_response.py">AuthUpdatePasswordResponse</a></code>
+- <code title="post /api/v1/auth/verify-otp">client.auth.<a href="./src/deepraven/resources/auth.py">verify_otp</a>(\*\*<a href="src/deepraven/types/auth_verify_otp_params.py">params</a>) -> <a href="./src/deepraven/types/auth_verify_otp_response.py">AuthVerifyOtpResponse</a></code>
 
-# Store
-
-Types:
-
-```python
-from deepraven.types import StoreListInventoryResponse
-```
-
-Methods:
-
-- <code title="get /store/inventory">client.store.<a href="./src/deepraven/resources/store/store.py">list_inventory</a>() -> <a href="./src/deepraven/types/store_list_inventory_response.py">StoreListInventoryResponse</a></code>
-
-## Orders
-
-Methods:
-
-- <code title="post /store/order">client.store.orders.<a href="./src/deepraven/resources/store/orders.py">create</a>(\*\*<a href="src/deepraven/types/store/order_create_params.py">params</a>) -> <a href="./src/deepraven/types/shared/order.py">Order</a></code>
-- <code title="get /store/order/{orderId}">client.store.orders.<a href="./src/deepraven/resources/store/orders.py">retrieve</a>(order_id) -> <a href="./src/deepraven/types/shared/order.py">Order</a></code>
-- <code title="delete /store/order/{orderId}">client.store.orders.<a href="./src/deepraven/resources/store/orders.py">delete</a>(order_id) -> None</code>
-
-# Users
+# Projects
 
 Types:
 
 ```python
-from deepraven.types import User, UserLoginResponse
+from deepraven.types import (
+    ProjectCreateResponse,
+    ProjectRetrieveResponse,
+    ProjectUpdateResponse,
+    ProjectListResponse,
+)
 ```
 
 Methods:
 
-- <code title="post /user">client.users.<a href="./src/deepraven/resources/users.py">create</a>(\*\*<a href="src/deepraven/types/user_create_params.py">params</a>) -> <a href="./src/deepraven/types/user.py">User</a></code>
-- <code title="get /user/{username}">client.users.<a href="./src/deepraven/resources/users.py">retrieve</a>(username) -> <a href="./src/deepraven/types/user.py">User</a></code>
-- <code title="put /user/{username}">client.users.<a href="./src/deepraven/resources/users.py">update</a>(existing_username, \*\*<a href="src/deepraven/types/user_update_params.py">params</a>) -> None</code>
-- <code title="delete /user/{username}">client.users.<a href="./src/deepraven/resources/users.py">delete</a>(username) -> None</code>
-- <code title="post /user/createWithList">client.users.<a href="./src/deepraven/resources/users.py">create_with_list</a>(\*\*<a href="src/deepraven/types/user_create_with_list_params.py">params</a>) -> <a href="./src/deepraven/types/user.py">User</a></code>
-- <code title="get /user/login">client.users.<a href="./src/deepraven/resources/users.py">login</a>(\*\*<a href="src/deepraven/types/user_login_params.py">params</a>) -> str</code>
-- <code title="get /user/logout">client.users.<a href="./src/deepraven/resources/users.py">logout</a>() -> None</code>
+- <code title="post /api/v1/projects">client.projects.<a href="./src/deepraven/resources/projects/projects.py">create</a>(\*\*<a href="src/deepraven/types/project_create_params.py">params</a>) -> <a href="./src/deepraven/types/project_create_response.py">ProjectCreateResponse</a></code>
+- <code title="get /api/v1/projects/{project_id}">client.projects.<a href="./src/deepraven/resources/projects/projects.py">retrieve</a>(project_id) -> <a href="./src/deepraven/types/project_retrieve_response.py">ProjectRetrieveResponse</a></code>
+- <code title="patch /api/v1/projects/{project_id}">client.projects.<a href="./src/deepraven/resources/projects/projects.py">update</a>(project_id, \*\*<a href="src/deepraven/types/project_update_params.py">params</a>) -> <a href="./src/deepraven/types/project_update_response.py">ProjectUpdateResponse</a></code>
+- <code title="get /api/v1/projects">client.projects.<a href="./src/deepraven/resources/projects/projects.py">list</a>() -> <a href="./src/deepraven/types/project_list_response.py">ProjectListResponse</a></code>
+- <code title="delete /api/v1/projects/{project_id}">client.projects.<a href="./src/deepraven/resources/projects/projects.py">delete</a>(project_id) -> None</code>
+
+## Keys
+
+Types:
+
+```python
+from deepraven.types.projects import KeyCreateResponse, KeyListResponse
+```
+
+Methods:
+
+- <code title="post /api/v1/projects/{project_id}/keys">client.projects.keys.<a href="./src/deepraven/resources/projects/keys.py">create</a>(project_id, \*\*<a href="src/deepraven/types/projects/key_create_params.py">params</a>) -> <a href="./src/deepraven/types/projects/key_create_response.py">KeyCreateResponse</a></code>
+- <code title="get /api/v1/projects/{project_id}/keys">client.projects.keys.<a href="./src/deepraven/resources/projects/keys.py">list</a>(project_id) -> <a href="./src/deepraven/types/projects/key_list_response.py">KeyListResponse</a></code>
+- <code title="delete /api/v1/projects/{project_id}/keys/{key_id}">client.projects.keys.<a href="./src/deepraven/resources/projects/keys.py">delete</a>(key_id, \*, project_id) -> None</code>
+
+## Contacts
+
+Types:
+
+```python
+from deepraven.types.projects import ContactRetrieveResponse, ContactListResponse
+```
+
+Methods:
+
+- <code title="get /api/v1/projects/{project_id}/contacts/{contact_id}">client.projects.contacts.<a href="./src/deepraven/resources/projects/contacts/contacts.py">retrieve</a>(contact_id, \*, project_id) -> <a href="./src/deepraven/types/projects/contact_retrieve_response.py">ContactRetrieveResponse</a></code>
+- <code title="get /api/v1/projects/{project_id}/contacts">client.projects.contacts.<a href="./src/deepraven/resources/projects/contacts/contacts.py">list</a>(project_id) -> <a href="./src/deepraven/types/projects/contact_list_response.py">ContactListResponse</a></code>
+
+### Conversations
+
+Types:
+
+```python
+from deepraven.types.projects.contacts import ConversationCreateResponse, ConversationListResponse
+```
+
+Methods:
+
+- <code title="post /api/v1/projects/{project_id}/contacts/{contact_id}/conversations">client.projects.contacts.conversations.<a href="./src/deepraven/resources/projects/contacts/conversations.py">create</a>(contact_id, \*, project_id, \*\*<a href="src/deepraven/types/projects/contacts/conversation_create_params.py">params</a>) -> <a href="./src/deepraven/types/projects/contacts/conversation_create_response.py">ConversationCreateResponse</a></code>
+- <code title="get /api/v1/projects/{project_id}/contacts/{contact_id}/conversations">client.projects.contacts.conversations.<a href="./src/deepraven/resources/projects/contacts/conversations.py">list</a>(contact_id, \*, project_id, \*\*<a href="src/deepraven/types/projects/contacts/conversation_list_params.py">params</a>) -> <a href="./src/deepraven/types/projects/contacts/conversation_list_response.py">ConversationListResponse</a></code>
+
+### Profiles
+
+Types:
+
+```python
+from deepraven.types.projects.contacts import (
+    ProfileRetrieveResponse,
+    ProfileExtractResponse,
+    ProfileExtractSyncResponse,
+    ProfileStatusResponse,
+)
+```
+
+Methods:
+
+- <code title="get /api/v1/projects/{project_id}/contacts/{contact_id}/profile">client.projects.contacts.profiles.<a href="./src/deepraven/resources/projects/contacts/profiles.py">retrieve</a>(contact_id, \*, project_id) -> <a href="./src/deepraven/types/projects/contacts/profile_retrieve_response.py">ProfileRetrieveResponse</a></code>
+- <code title="delete /api/v1/projects/{project_id}/contacts/{contact_id}/contact">client.projects.contacts.profiles.<a href="./src/deepraven/resources/projects/contacts/profiles.py">delete_contact</a>(contact_id, \*, project_id) -> None</code>
+- <code title="post /api/v1/projects/{project_id}/contacts/{contact_id}/profile/extract">client.projects.contacts.profiles.<a href="./src/deepraven/resources/projects/contacts/profiles.py">extract</a>(contact_id, \*, project_id, \*\*<a href="src/deepraven/types/projects/contacts/profile_extract_params.py">params</a>) -> <a href="./src/deepraven/types/projects/contacts/profile_extract_response.py">ProfileExtractResponse</a></code>
+- <code title="post /api/v1/projects/{project_id}/contacts/{contact_id}/profile/extract/sync">client.projects.contacts.profiles.<a href="./src/deepraven/resources/projects/contacts/profiles.py">extract_sync</a>(contact_id, \*, project_id, \*\*<a href="src/deepraven/types/projects/contacts/profile_extract_sync_params.py">params</a>) -> <a href="./src/deepraven/types/projects/contacts/profile_extract_sync_response.py">ProfileExtractSyncResponse</a></code>
+- <code title="get /api/v1/projects/{project_id}/contacts/{contact_id}/profile/status">client.projects.contacts.profiles.<a href="./src/deepraven/resources/projects/contacts/profiles.py">status</a>(contact_id, \*, project_id) -> <a href="./src/deepraven/types/projects/contacts/profile_status_response.py">ProfileStatusResponse</a></code>

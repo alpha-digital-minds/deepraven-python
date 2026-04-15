@@ -1,9 +1,9 @@
-# Deepraven Python API library
+# Deep Raven Python API library
 
 <!-- prettier-ignore -->
 [![PyPI version](https://img.shields.io/pypi/v/deepraven.svg?label=pypi%20(stable))](https://pypi.org/project/deepraven/)
 
-The Deepraven Python library provides convenient access to the Deepraven REST API from any Python 3.9+
+The Deep Raven Python library provides convenient access to the Deep Raven REST API from any Python 3.9+
 application. The library includes type definitions for all request params and response fields,
 and offers both synchronous and asynchronous clients powered by [httpx](https://github.com/encode/httpx).
 
@@ -11,7 +11,7 @@ It is generated with [Stainless](https://www.stainless.com/).
 
 ## Documentation
 
-The full API of this library can be found in [api.md](api.md).
+The REST API documentation can be found on [deepraven.ai](https://deepraven.ai). The full API of this library can be found in [api.md](api.md).
 
 ## Installation
 
@@ -28,47 +28,51 @@ pip install git+ssh://git@github.com/stainless-sdks/deepraven-python.git
 The full API of this library can be found in [api.md](api.md).
 
 ```python
-import os
-from deepraven import Deepraven
+from deepraven import DeepRaven
 
-client = Deepraven(
-    api_key=os.environ.get("PETSTORE_API_KEY"),  # This is the default and can be omitted
-)
+client = DeepRaven()
 
-order = client.store.orders.create(
-    pet_id=1,
-    quantity=1,
-    status="placed",
+conversation = client.projects.contacts.conversations.create(
+    contact_id="contact_456",
+    project_id="proj_123",
+    messages=[
+        {
+            "role": "user",
+            "content": "I need a gift under $200",
+        }
+    ],
 )
-print(order.id)
+print(conversation.contact_id)
 ```
 
 While you can provide an `api_key` keyword argument,
 we recommend using [python-dotenv](https://pypi.org/project/python-dotenv/)
-to add `PETSTORE_API_KEY="My API Key"` to your `.env` file
+to add `DEEPRAVEN_API_KEY="My API Key"` to your `.env` file
 so that your API Key is not stored in source control.
 
 ## Async usage
 
-Simply import `AsyncDeepraven` instead of `Deepraven` and use `await` with each API call:
+Simply import `AsyncDeepRaven` instead of `DeepRaven` and use `await` with each API call:
 
 ```python
-import os
 import asyncio
-from deepraven import AsyncDeepraven
+from deepraven import AsyncDeepRaven
 
-client = AsyncDeepraven(
-    api_key=os.environ.get("PETSTORE_API_KEY"),  # This is the default and can be omitted
-)
+client = AsyncDeepRaven()
 
 
 async def main() -> None:
-    order = await client.store.orders.create(
-        pet_id=1,
-        quantity=1,
-        status="placed",
+    conversation = await client.projects.contacts.conversations.create(
+        contact_id="contact_456",
+        project_id="proj_123",
+        messages=[
+            {
+                "role": "user",
+                "content": "I need a gift under $200",
+            }
+        ],
     )
-    print(order.id)
+    print(conversation.contact_id)
 
 
 asyncio.run(main())
@@ -90,23 +94,26 @@ pip install 'deepraven[aiohttp] @ git+ssh://git@github.com/stainless-sdks/deepra
 Then you can enable it by instantiating the client with `http_client=DefaultAioHttpClient()`:
 
 ```python
-import os
 import asyncio
 from deepraven import DefaultAioHttpClient
-from deepraven import AsyncDeepraven
+from deepraven import AsyncDeepRaven
 
 
 async def main() -> None:
-    async with AsyncDeepraven(
-        api_key=os.environ.get("PETSTORE_API_KEY"),  # This is the default and can be omitted
+    async with AsyncDeepRaven(
         http_client=DefaultAioHttpClient(),
     ) as client:
-        order = await client.store.orders.create(
-            pet_id=1,
-            quantity=1,
-            status="placed",
+        conversation = await client.projects.contacts.conversations.create(
+            contact_id="contact_456",
+            project_id="proj_123",
+            messages=[
+                {
+                    "role": "user",
+                    "content": "I need a gift under $200",
+                }
+            ],
         )
-        print(order.id)
+        print(conversation.contact_id)
 
 
 asyncio.run(main())
@@ -121,23 +128,6 @@ Nested request parameters are [TypedDicts](https://docs.python.org/3/library/typ
 
 Typed requests and responses provide autocomplete and documentation within your editor. If you would like to see type errors in VS Code to help catch bugs earlier, set `python.analysis.typeCheckingMode` to `basic`.
 
-## Nested params
-
-Nested parameters are dictionaries, typed using `TypedDict`, for example:
-
-```python
-from deepraven import Deepraven
-
-client = Deepraven()
-
-pet = client.pets.create(
-    name="doggie",
-    photo_urls=["string"],
-    category={},
-)
-print(pet.category)
-```
-
 ## Handling errors
 
 When the library is unable to connect to the API (for example, due to network connection problems or a timeout), a subclass of `deepraven.APIConnectionError` is raised.
@@ -149,12 +139,15 @@ All errors inherit from `deepraven.APIError`.
 
 ```python
 import deepraven
-from deepraven import Deepraven
+from deepraven import DeepRaven
 
-client = Deepraven()
+client = DeepRaven()
 
 try:
-    client.store.list_inventory()
+    client.projects.contacts.profiles.retrieve(
+        contact_id="contact_456",
+        project_id="proj_123",
+    )
 except deepraven.APIConnectionError as e:
     print("The server could not be reached")
     print(e.__cause__)  # an underlying Exception, likely raised within httpx.
@@ -188,16 +181,19 @@ Connection errors (for example, due to a network connectivity problem), 408 Requ
 You can use the `max_retries` option to configure or disable retry settings:
 
 ```python
-from deepraven import Deepraven
+from deepraven import DeepRaven
 
 # Configure the default for all requests:
-client = Deepraven(
+client = DeepRaven(
     # default is 2
     max_retries=0,
 )
 
 # Or, configure per-request:
-client.with_options(max_retries=5).store.list_inventory()
+client.with_options(max_retries=5).projects.contacts.profiles.retrieve(
+    contact_id="contact_456",
+    project_id="proj_123",
+)
 ```
 
 ### Timeouts
@@ -206,21 +202,24 @@ By default requests time out after 1 minute. You can configure this with a `time
 which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/timeouts/#fine-tuning-the-configuration) object:
 
 ```python
-from deepraven import Deepraven
+from deepraven import DeepRaven
 
 # Configure the default for all requests:
-client = Deepraven(
+client = DeepRaven(
     # 20 seconds (default is 1 minute)
     timeout=20.0,
 )
 
 # More granular control:
-client = Deepraven(
+client = DeepRaven(
     timeout=httpx.Timeout(60.0, read=5.0, write=10.0, connect=2.0),
 )
 
 # Override per-request:
-client.with_options(timeout=5.0).store.list_inventory()
+client.with_options(timeout=5.0).projects.contacts.profiles.retrieve(
+    contact_id="contact_456",
+    project_id="proj_123",
+)
 ```
 
 On timeout, an `APITimeoutError` is thrown.
@@ -233,10 +232,10 @@ Note that requests that time out are [retried twice by default](#retries).
 
 We use the standard library [`logging`](https://docs.python.org/3/library/logging.html) module.
 
-You can enable logging by setting the environment variable `DEEPRAVEN_LOG` to `info`.
+You can enable logging by setting the environment variable `DEEP_RAVEN_LOG` to `info`.
 
 ```shell
-$ export DEEPRAVEN_LOG=info
+$ export DEEP_RAVEN_LOG=info
 ```
 
 Or to `debug` for more verbose logging.
@@ -258,14 +257,17 @@ if response.my_field is None:
 The "raw" Response object can be accessed by prefixing `.with_raw_response.` to any HTTP method call, e.g.,
 
 ```py
-from deepraven import Deepraven
+from deepraven import DeepRaven
 
-client = Deepraven()
-response = client.store.with_raw_response.list_inventory()
+client = DeepRaven()
+response = client.projects.contacts.profiles.with_raw_response.retrieve(
+    contact_id="contact_456",
+    project_id="proj_123",
+)
 print(response.headers.get('X-My-Header'))
 
-store = response.parse()  # get the object that `store.list_inventory()` would have returned
-print(store)
+profile = response.parse()  # get the object that `projects.contacts.profiles.retrieve()` would have returned
+print(profile.user_id)
 ```
 
 These methods return an [`APIResponse`](https://github.com/stainless-sdks/deepraven-python/tree/main/src/deepraven/_response.py) object.
@@ -279,7 +281,10 @@ The above interface eagerly reads the full response body when you make the reque
 To stream the response body, use `.with_streaming_response` instead, which requires a context manager and only reads the response body once you call `.read()`, `.text()`, `.json()`, `.iter_bytes()`, `.iter_text()`, `.iter_lines()` or `.parse()`. In the async client, these are async methods.
 
 ```python
-with client.store.with_streaming_response.list_inventory() as response:
+with client.projects.contacts.profiles.with_streaming_response.retrieve(
+    contact_id="contact_456",
+    project_id="proj_123",
+) as response:
     print(response.headers.get("X-My-Header"))
 
     for line in response.iter_lines():
@@ -332,10 +337,10 @@ You can directly override the [httpx client](https://www.python-httpx.org/api/#c
 
 ```python
 import httpx
-from deepraven import Deepraven, DefaultHttpxClient
+from deepraven import DeepRaven, DefaultHttpxClient
 
-client = Deepraven(
-    # Or use the `DEEPRAVEN_BASE_URL` env var
+client = DeepRaven(
+    # Or use the `DEEP_RAVEN_BASE_URL` env var
     base_url="http://my.test.server.example.com:8083",
     http_client=DefaultHttpxClient(
         proxy="http://my.test.proxy.example.com",
@@ -355,9 +360,9 @@ client.with_options(http_client=DefaultHttpxClient(...))
 By default the library closes underlying HTTP connections whenever the client is [garbage collected](https://docs.python.org/3/reference/datamodel.html#object.__del__). You can manually close the client using the `.close()` method if desired, or with a context manager that closes when exiting.
 
 ```py
-from deepraven import Deepraven
+from deepraven import DeepRaven
 
-with Deepraven() as client:
+with DeepRaven() as client:
   # make requests here
   ...
 

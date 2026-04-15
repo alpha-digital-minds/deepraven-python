@@ -8,13 +8,13 @@ from typing import TYPE_CHECKING
 import anyio
 
 if TYPE_CHECKING:
-    from ._client import Deepraven, AsyncDeepraven
+    from ._client import DeepRaven, AsyncDeepRaven
 
 
 class SyncAPIResource:
-    _client: Deepraven
+    _client: DeepRaven
 
-    def __init__(self, client: Deepraven) -> None:
+    def __init__(self, client: DeepRaven) -> None:
         self._client = client
         self._get = client.get
         self._post = client.post
@@ -28,9 +28,9 @@ class SyncAPIResource:
 
 
 class AsyncAPIResource:
-    _client: AsyncDeepraven
+    _client: AsyncDeepRaven
 
-    def __init__(self, client: AsyncDeepraven) -> None:
+    def __init__(self, client: AsyncDeepRaven) -> None:
         self._client = client
         self._get = client.get
         self._post = client.post
