@@ -16,9 +16,12 @@ The REST API documentation can be found on [deepraven.ai](https://deepraven.ai).
 ## Installation
 
 ```sh
-# install from PyPI
-pip install deepraven
+# install from the production repo
+pip install git+ssh://git@github.com/alpha-digital-minds/deepraven-python.git
 ```
+
+> [!NOTE]
+> Once this package is [published to PyPI](https://www.stainless.com/docs/guides/publish), this will become: `pip install deepraven`
 
 ## Usage
 
@@ -84,8 +87,8 @@ By default, the async client uses `httpx` for HTTP requests. However, for improv
 You can enable this by installing `aiohttp`:
 
 ```sh
-# install from PyPI
-pip install deepraven[aiohttp]
+# install from the production repo
+pip install 'deepraven[aiohttp] @ git+ssh://git@github.com/alpha-digital-minds/deepraven-python.git'
 ```
 
 Then you can enable it by instantiating the client with `http_client=DefaultAioHttpClient()`:
