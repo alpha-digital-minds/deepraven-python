@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.3.0 (2026-04-23)
+
+Full Changelog: [v0.2.0...v0.3.0](https://github.com/alpha-digital-minds/deepraven-python/compare/v0.2.0...v0.3.0)
+
+### Features
+
+* **api:** api update ([58089b2](https://github.com/alpha-digital-minds/deepraven-python/commit/58089b227691510ff6fb33dc2b1f54c2dcda5dd2))
+
+
+### Performance Improvements
+
+* **client:** optimize file structure copying in multipart requests ([c68fea7](https://github.com/alpha-digital-minds/deepraven-python/commit/c68fea76173a87ebc8604dd8157b7df5db5eb25b))
+
+
+### Chores
+
+* **internal:** more robust bootstrap script ([f1e5244](https://github.com/alpha-digital-minds/deepraven-python/commit/f1e52443527a5e34bf9fb712f7339cafe3b3e7f0))
+
 ## 0.2.0 (2026-04-15)
 
 Full Changelog: [v0.1.2...v0.2.0](https://github.com/alpha-digital-minds/deepraven-python/compare/v0.1.2...v0.2.0)
