@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.3.0 (2026-05-01)
+
+Full Changelog: [v0.2.0...v0.3.0](https://github.com/alpha-digital-minds/deepraven-python/compare/v0.2.0...v0.3.0)
+
+### Features
+
+* **api:** api update ([58089b2](https://github.com/alpha-digital-minds/deepraven-python/commit/58089b227691510ff6fb33dc2b1f54c2dcda5dd2))
+* support setting headers via env ([eee4ea2](https://github.com/alpha-digital-minds/deepraven-python/commit/eee4ea2f409086d6c6cccf6dfe729f26f30a0138))
+
+
+### Bug Fixes
+
+* use correct field name format for multipart file arrays ([54b3477](https://github.com/alpha-digital-minds/deepraven-python/commit/54b3477e7b8b82c51d95751005790e39afe8f6a0))
+
+
+### Performance Improvements
+
+* **client:** optimize file structure copying in multipart requests ([c68fea7](https://github.com/alpha-digital-minds/deepraven-python/commit/c68fea76173a87ebc8604dd8157b7df5db5eb25b))
+
+
+### Chores
+
+* **internal:** more robust bootstrap script ([f1e5244](https://github.com/alpha-digital-minds/deepraven-python/commit/f1e52443527a5e34bf9fb712f7339cafe3b3e7f0))
+* **internal:** reformat pyproject.toml ([e63ad99](https://github.com/alpha-digital-minds/deepraven-python/commit/e63ad99a150f5cea95e42646cc49500e0124dff0))
+
 ## 0.2.0 (2026-04-15)
 
 Full Changelog: [v0.1.2...v0.2.0](https://github.com/alpha-digital-minds/deepraven-python/compare/v0.1.2...v0.2.0)
